@@ -20,6 +20,7 @@ class Product extends Model
         'product_pack_quantity',
         'product_price',
         'offer_percentage',
+        'offer_percentage_price',
         'quantity',
     ];
     protected static function boot()

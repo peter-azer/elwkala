@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 
 class CategoryController extends Controller
@@ -88,6 +89,13 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::findOrFail($id);
+            if ($category->category_cover) {
+                $imagePath = $category->category_cover;
+                // Remove domain and '/storage' prefix
+                $cleanPath = Str::replaceFirst('/storage', '', parse_url($imagePath, PHP_URL_PATH));
+                // Delete the image from the public disk
+                Storage::disk('public')->delete($cleanPath);
+                }
             $category->delete();
             return response()->json(["message" => "Deleted Successfully"]);
         } catch (\Exception $error) {

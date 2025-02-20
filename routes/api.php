@@ -57,20 +57,31 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
 
 Route::middleware(['auth:sanctum', 'role:user'])->prefix('application')->group( function () {
     // categories routes
-    Route::get('/categories', [CategoryController::class, 'index']); # show categories
-    Route::get('/category/product/{category}', [CategoryController::class, 'show']); # show categories and related products
+        # show categories
+        Route::get('/categories', [CategoryController::class, 'index']); #Done  
+        # show categories and related products
+        Route::get('/category/product/{category}', [CategoryController::class, 'show']); #Done
     // products routes
-    Route::get('/products', [ProductController::class, 'index']); # show all products
-    Route::get('/product/{id}', [ProductController::class, 'show']); # view product
-    // Cart routes
-    Route::get('/cart', [CartController::class, 'index']); # view user cart
-    Route::post('/cart/add', [CartController::class, 'store']); # add product to cart
-    Route::put('/cart/edit/{id}', [CartController::class, 'update']); # edit quantity
-    Route::delete('/cart/delete/{id}', [CartController::class, 'destroy']); # delete product from cart
-    // order routes
-    Route::get('/orders', [OrderController::class, 'index']); # show all orders history
-    Route::get('/order/{id}', [OrderController::class, 'show']); # view order details
-    Route::post('/order/checkout', [OrderController::class, 'store']); # take orders from cart 
+        # show all products
+        Route::get('/products', [ProductController::class, 'index']);
+        # view product
+        Route::get('/product/{id}', [ProductController::class, 'show']);
+    // Cart routes 
+        # view user cart
+        Route::get('/cart', [CartController::class, 'index']); 
+        # add product to cart
+        Route::post('/cart/add', [CartController::class, 'store']); 
+        # edit quantity
+        Route::put('/cart/edit/{id}', [CartController::class, 'update']); 
+        # delete product from cart
+        Route::delete('/cart/delete/{id}', [CartController::class, 'destroy']);
+    // order routes 
+        # show all orders history
+        Route::get('/orders', [OrderController::class, 'index']);
+        # view order details
+        Route::get('/order/{id}', [OrderController::class, 'show']);  
+        # take orders from cart 
+        Route::post('/order/checkout', [OrderController::class, 'store']);
 
 });
 

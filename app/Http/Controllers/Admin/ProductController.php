@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -40,7 +41,8 @@ class ProductController extends Controller
                 'product_size' => 'required|integer',
                 'product_pack_quantity' => 'required|integer',
                 'product_price' => 'required|integer',
-                'offer_percentage' => 'required|integer',
+                'offer_percentage' => 'nullable|integer',
+                'offer_percentage_price' => 'nullable|integer',
                 'quantity' => 'required|integer',
             ]);
 
@@ -48,6 +50,12 @@ class ProductController extends Controller
             if ($request->hasFile('product_image')) {
                 $imagePath = $request->file('product_image')->store('products', 'public');
                 $validatedData['product_image'] = URL::to(Storage::url($imagePath));
+            }
+
+            if ($validatedData['offer_percentage']) {
+                $validatedData['offer_percentage_price'] = $validatedData['product_price'] - (
+                    ($validatedData['offer_percentage'] / 100)
+                    * $validatedData['product_price']);
             }
 
             $product = Product::create($validatedData);
@@ -66,12 +74,13 @@ class ProductController extends Controller
                 'category_id' => 'integer|exists:categories,id',
                 'product_name' => 'required|string',
                 'product_code' => 'required|string',
-                'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                // 'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'description' => 'required|string',
                 'product_size' => 'required|integer',
                 'product_pack_quantity' => 'required|integer',
                 'product_price' => 'required|integer',
-                'offer_percentage' => 'required|integer',
+                'offer_percentage' => 'nullable|integer',
+                'offer_percentage_price' => 'nullable|integer',
                 'quantity' => 'required|integer',
             ]);
 
@@ -89,6 +98,13 @@ class ProductController extends Controller
                 $imagePath = $request->file('product_cover')->store('products', 'public');
                 $validatedData['product_cover'] = URL::to(Storage::url($imagePath));
             }
+            if ($validatedData['offer_percentage'] != 0) {
+                $validatedData['offer_percentage_price'] = $validatedData['product_price'] - (
+                    ($validatedData['offer_percentage'] / 100)
+                    * $validatedData['product_price']);
+            } else {
+                $validatedData['offer_percentage_price'] = 0;
+            }
 
             // Update product
             $product->update($validatedData);
@@ -103,6 +119,14 @@ class ProductController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
+            if ($product->product_image) {
+                // dd($product->product_image);
+                $imagePath = $product->product_image;
+                // Remove domain and '/storage' prefix
+                $cleanPath = Str::replaceFirst('/storage', '', parse_url($imagePath, PHP_URL_PATH));
+                // Delete the image from the public disk
+                Storage::disk('public')->delete($cleanPath);
+                }
             $product->delete();
             return response()->json(["message" => "Deleted Successfully"]);
         } catch (\Exception $error) {

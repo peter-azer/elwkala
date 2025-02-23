@@ -30,7 +30,8 @@ class AuthController extends Controller
             'message' => 'Login successful',
             'token' => $token,
             'userName' => $user->name,
-            'market' => $user->market()->get()
+            'market' => $user->market()->get(),
+            'role' => $user->getRoleNames()[0]
         ], 200);
     }
 
@@ -39,7 +40,7 @@ class AuthController extends Controller
      */
     public function registerUser(Request $request)
     {
-        try{
+        try {
 
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -56,10 +57,10 @@ class AuthController extends Controller
         } catch (\Exception $error) {
             return response()->json(['message' => $error], 500);
         }
-        }
-        public function registerMarket(Request $request)
-        {
-            try{
+    }
+    public function registerMarket(Request $request)
+    {
+        try {
             $request->validate([
                 'user_id' => 'integer|exists:users,id',
                 'area_id' => 'integer|exists:areas,id',
@@ -70,7 +71,7 @@ class AuthController extends Controller
                 'phone3' => 'required|string',
                 'role' => 'required|string|exists:roles,name',
                 'address' => 'required|string',
-                'max_order_quantity'=>'required|integer'
+                'max_order_quantity' => 'required|integer'
             ]);
             $market = Market::create([
                 'user_id' => $request->user_id,
@@ -79,13 +80,13 @@ class AuthController extends Controller
                 'manager_name' => $request->manager_name,
                 'market_name' => $request->market_name,
                 'phone2' => $request->phone2,
-            'phone3' => $request->phone3,
-            'address' => $request->address
-        ]);
-        $market->assignRole($request->role); 
-    }catch(\Exception $error){
-        return response()->json(["message"=> $error]);
-    }
+                'phone3' => $request->phone3,
+                'address' => $request->address
+            ]);
+            $market->assignRole($request->role);
+        } catch (\Exception $error) {
+            return response()->json(["message" => $error]);
+        }
     }
 
     /**

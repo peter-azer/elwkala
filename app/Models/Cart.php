@@ -17,10 +17,12 @@ class Cart extends Model
         'ordered'
     ];
 
-    public function market(){
+    public function market()
+    {
         return $this->hasMany(Market::class, 'market_id');
     }
-    public function product(){
-        return $this->hasMany(Product::class, 'product_id');
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 }

@@ -19,13 +19,13 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware(['auth:sanctum', 'role:super admin'])->group(function() {
+Route::middleware(['auth:sanctum', 'role:super admin'])->group(function () {
     Route::post('/register-user', [AuthController::class, 'registerUser']); #Done
     Route::post('/register-market', [AuthController::class, 'registerMarket']); #Done
 });
 
 
-Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->group( function () {
+Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->group(function () {
     // users routes
     Route::get('/users', [AdminUserController::class, 'index']); #Done
     Route::put('/user/edit/{id}', [AdminUserController::class, 'update']); #Done
@@ -52,37 +52,38 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::post('/order/create', [AdminOrderController::class, 'store']); #Done
     Route::put('/order/edit/{id}', [AdminOrderController::class, 'update']); #Done
     Route::delete('/order/delete/{id}', [AdminOrderController::class, 'destroy']); #Done
+    Route::put('/order/assign/{id}', [AdminUserController::class, 'assign']); # assign orders to representative
 });
+
 // Handel offers and sales #Done
 
-Route::middleware(['auth:sanctum', 'role:user'])->prefix('application')->group( function () {
+Route::middleware(['auth:sanctum', 'role:user'])->prefix('application')->group(function () {
     // categories routes
-        # show categories
-        Route::get('/categories', [CategoryController::class, 'index']); #Done  
-        # show categories and related products
-        Route::get('/category/product/{category}', [CategoryController::class, 'show']); #Done
+    # show categories
+    Route::get('/categories', [CategoryController::class, 'index']); #Done  
+    # show categories and related products
+    Route::get('/category/product/{category}', [CategoryController::class, 'show']); #Done
     // products routes
-        # show all products
-        Route::get('/products', [ProductController::class, 'index']);
-        # view product
-        Route::get('/product/{id}', [ProductController::class, 'show']);
+    # show all products
+    Route::get('/products', [ProductController::class, 'index']); #Done
+    # view product
+    Route::get('/product/{product}', [ProductController::class, 'show']); #Done
     // Cart routes 
-        # view user cart
-        Route::get('/cart', [CartController::class, 'index']); 
-        # add product to cart
-        Route::post('/cart/add', [CartController::class, 'store']); 
-        # edit quantity
-        Route::put('/cart/edit/{id}', [CartController::class, 'update']); 
-        # delete product from cart
-        Route::delete('/cart/delete/{id}', [CartController::class, 'destroy']);
+    # view user cart
+    Route::get('/cart', [CartController::class, 'index']); #Done
+    # add product to cart
+    Route::post('/cart/add', [CartController::class, 'store']); #Done
+    # edit quantity
+    Route::put('/cart/edit/{cart}', [CartController::class, 'update']); #Done
+    # delete product from cart
+    Route::delete('/cart/delete/{cart}', [CartController::class, 'destroy']);  #Done
     // order routes 
-        # show all orders history
-        Route::get('/orders', [OrderController::class, 'index']);
-        # view order details
-        Route::get('/order/{id}', [OrderController::class, 'show']);  
-        # take orders from cart 
-        Route::post('/order/checkout', [OrderController::class, 'store']);
-
+    # show all orders history
+    Route::get('/orders', [OrderController::class, 'index']); #Done
+    # view order details
+    Route::get('/order/{order}', [OrderController::class, 'show']); #Done
+    # take orders from cart 
+    Route::post('/order/checkout', [OrderController::class, 'store']); #Done
 });
 
 // handle banners and offers announcement

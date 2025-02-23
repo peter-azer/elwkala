@@ -37,7 +37,12 @@ class Product extends Model
         $number = $latest ? intval(substr($latest->product_code, 5)) + 1 : 1;
         return 'PROD-' . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
-    public function category(){
+    public function category()
+    {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+    public function cart()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

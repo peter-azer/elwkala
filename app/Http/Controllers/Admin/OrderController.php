@@ -49,6 +49,12 @@ class OrderController extends Controller
                 // Fetch product price from database
                 $product = Product::findOrFail($validatedData['product_id']);
                 $itemPrice = $product->product_price * $validatedData['quantity'];
+                if($product->offer_percentage_price == 0 || $product->offer_percentage_price == null){
+                    
+                    $itemPrice = $product->product_price * $validatedData['quantity'];
+                }else{
+                    $itemPrice = $product->offer_percentage_price * $validatedData['quantity'];
+                }
 
                 // Add current item price to total order price
                 $totalOrderPrice += $itemPrice;

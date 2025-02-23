@@ -82,6 +82,7 @@ class AuthController extends Controller
             'phone3' => $request->phone3,
             'address' => $request->address
         ]);
+        $market->assignRole($request->role); 
     }catch(\Exception $error){
         return response()->json(["message"=> $error]);
     }

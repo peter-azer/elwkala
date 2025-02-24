@@ -13,8 +13,12 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categroy = Category::all();
-        return response()->json($categroy, 200);
+        try{
+            $category = Category::all();
+            return response()->json($category, 200);
+        }catch(\Exception $error){
+            return response()->json(['message' => $error->getMessage()], $error->getCode());
+        }
     }
 
     public function show($id)

@@ -81,6 +81,7 @@ class AuthController extends Controller
                 'market_name' => $request->market_name,
                 'phone2' => $request->phone2,
                 'phone3' => $request->phone3,
+                'max_order_quantity' => $request->max_order_quantity,
                 'address' => $request->address
             ]);
             $market->assignRole($request->role);

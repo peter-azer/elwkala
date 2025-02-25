@@ -28,4 +28,8 @@ class Market extends Model
     public function area(){
         return $this->belongsTo(MarketArea::class);
     }
+    public function assign()
+    {
+        return $this->belongsTo(AssignedOrders::class);
+    }
 }

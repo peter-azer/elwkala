@@ -54,5 +54,9 @@ class User extends Authenticatable
     public function market(){
         return $this->hasMany(Market::class);
     }
+    public function assign()
+    {
+        return $this->belongsTo(AssignedOrders::class);
+    }
 
 }

@@ -13,7 +13,12 @@ class AreaController extends Controller
      */
     public function index()
     {
-        //
+        try{
+            $areas = Area::all();
+            return response()->json($areas);
+        }catch(\Exception $error){
+            return response()->json(['error' => $error->getMessage()], 500);
+        }
     }
 
     /**

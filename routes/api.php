@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\MarketController as AdminMarketController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
@@ -30,6 +31,8 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::get('/users', [AdminUserController::class, 'index']); #Done
     Route::put('/user/edit/{id}', [AdminUserController::class, 'update']); #Done
     Route::get('/user/markets/{id}', [AdminUserController::class, 'getUserMarkets']); #Done
+    //areas routes
+    Route::get('/areas', [AreaController::class, 'index']);
     // market routes
     Route::get('/markets', [AdminMarketController::class, 'getAllMarkets']); #Done
     Route::get('/market/{id}', [AdminMarketController::class, 'getMarket']); #Done

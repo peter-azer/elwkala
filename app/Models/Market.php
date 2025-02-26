@@ -32,4 +32,7 @@ class Market extends Model
     {
         return $this->belongsTo(AssignedOrders::class);
     }
+    public function order(){
+        return $this->hasMany(Order::class);
+    }
 }

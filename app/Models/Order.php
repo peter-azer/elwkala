@@ -22,7 +22,7 @@ class Order extends Model
 
     public function market()
     {
-        return $this->hasMany(Market::class);
+        return $this->belongsTo(Market::class);
     }
     public function product()
     {

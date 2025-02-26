@@ -13,6 +13,9 @@ class Area extends Model
         'area'
     ];
 
+    public function market(){
+        return $this->hasMany(Market::class);
+    }
     public function area(){
         return $this->hasMany(UserArea::class);
     }

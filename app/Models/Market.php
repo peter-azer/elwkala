@@ -21,18 +21,21 @@ class Market extends Model
         'area_id'
     ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function area(){
-        return $this->belongsTo(MarketArea::class);
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
     }
     public function assign()
     {
         return $this->belongsTo(AssignedOrders::class);
     }
-    public function order(){
+    public function order()
+    {
         return $this->hasMany(Order::class);
     }
 }

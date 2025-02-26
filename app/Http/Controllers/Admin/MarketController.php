@@ -20,7 +20,7 @@ class MarketController extends Controller
 
     public function getAllMarkets(){
         try {
-            $markets = Market::all();
+            $markets = Market::with('area', 'user')->get();
             return response()->json($markets, 200);
             } catch (\Exception $error) {
                 return response()->json(['error' => $error->getMessage()], $error->getCode());

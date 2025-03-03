@@ -61,7 +61,7 @@ class CategoryController extends Controller
         try {
             $validatedData = $request->validate([
                 'category_name' => 'required|string',
-                'category_cover' => 'nullable|string',
+                'category_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'description' => 'required|string',
             ]);
 

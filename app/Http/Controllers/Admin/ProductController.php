@@ -74,7 +74,7 @@ class ProductController extends Controller
                 'category_id' => 'integer|exists:categories,id',
                 'product_name' => 'required|string',
                 'product_code' => 'required|string',
-                // 'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'description' => 'required|string',
                 'product_size' => 'required|integer',
                 'product_pack_quantity' => 'required|integer',

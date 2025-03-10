@@ -20,11 +20,19 @@ class OrderController extends Controller
         $market = Market::query()
             ->where('user_id', $user->id)
             ->first();
-        // dd($market);
         $orders = Order::query()
             ->where('market_id', $market->id)
             ->with('product')
-            ->get();
+            ->get()
+            ->groupBy('order_id')
+            ->map(function ($group) {
+                $total = $group->sum('total_order_price');
+                return [
+                    'orders' => $group,
+                    'total' => $total
+                ];
+            });
+
         return response()->json($orders);
     }
 

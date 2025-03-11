@@ -60,7 +60,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
 
 // Handel offers and sales #Done
 
-Route::middleware(['auth:sanctum', 'role:user'])->prefix('application')->group(function () {
+Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('application')->group(function () {
     // categories routes
     # show categories
     Route::get('/categories', [CategoryController::class, 'index']); #Done  

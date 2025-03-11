@@ -31,7 +31,7 @@ class AuthController extends Controller
             'token' => $token,
             'userName' => $user->name,
             'market' => $user->market()->get(),
-            'role' => $user->getRoleNames()[0]
+            'role' => $user->getRoleNames()
         ], 200);
     }
 

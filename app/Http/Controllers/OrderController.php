@@ -45,7 +45,7 @@ class OrderController extends Controller
         $market = Market::query()
             ->where('user_id', $user->id)
             ->first();
-        
+
         // Generate a unique order_id
         $orderId = OrderIdService::generate();
         $cart = $request->input('cart');
@@ -65,9 +65,18 @@ class OrderController extends Controller
 
                 // Fetch product price from database
                 $product = Product::findOrFail($validatedData['product_id']);
-                if($product->offer_percentage_price == 0 || $product->offer_percentage_price == null){
+                
+                // Check if the quantity requested is available
+                try{
+                    $product->quantity = $product->quantity - $validatedData['quantity'];
+                    $product->save();
+                }catch(\Exception $e){
+                    return response()->json(['error' => $e->getMessage()], 500);
+                }
+                // Calculate total order price for the current item
+                if ($product->offer_percentage_price == 0 || $product->offer_percentage_price == null) {
                     $itemPrice = $product->product_price * $validatedData['quantity'];
-                }else{
+                } else {
                     $itemPrice = $product->offer_percentage_price * $validatedData['quantity'];
                 }
 
@@ -98,9 +107,9 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $details = Order::query()
-        ->where('id', $order->id)
-        ->with('product')
-        ->first();
+            ->where('id', $order->id)
+            ->with('product')
+            ->first();
         return response()->json($details);
     }
 }

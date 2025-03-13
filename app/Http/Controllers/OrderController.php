@@ -16,11 +16,12 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
-        $market = Market::query()
+        try{
+            $user = auth()->user();
+            $market = Market::query()
             ->where('user_id', $user->id)
             ->first();
-        $orders = Order::query()
+            $orders = Order::query()
             ->where('market_id', $market->id)
             ->with('product')
             ->get()
@@ -32,8 +33,11 @@ class OrderController extends Controller
                     'total' => $total
                 ];
             });
-
-        return response()->json($orders);
+            
+            return response()->json($orders);
+        }catch(\Exception $error){
+            return response()->json(['error' => $error->getMessage()], 500);
+        }
     }
 
     /**

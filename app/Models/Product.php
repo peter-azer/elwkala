@@ -45,4 +45,8 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function recommended(){
+        return $this->hasMany(RecomendedProducts::class, 'product_id');
+    }
 }

@@ -17,6 +17,7 @@ class OrderController extends Controller
     public function index()
     {
         try{
+
             $user = auth()->user();
             $market = Market::query()
             ->where('user_id', $user->id)

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\MarketController as AdminMarketController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\RecomendedProductsController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -49,6 +50,8 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::post('/product/create', [AdminProductController::class, 'store']); #Done
     Route::put('/product/edit/{id}', [AdminProductController::class, 'update']); #Done
     Route::delete('/product/delete/{id}', [AdminProductController::class, 'destroy']); #Done
+    Route::post('/product/assign', [RecomendedProductsController::class, 'store']);
+    Route::delete('/product/unassign/{id}', [RecomendedProductsController::class, 'destroy']);
     // orders routes
     Route::get('/orders', [AdminOrderController::class, 'index']); #Done
     Route::get('/order/{id}', [AdminOrderController::class, 'show']); #Done
@@ -71,6 +74,8 @@ Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('applicatio
     Route::get('/products', [ProductController::class, 'index']); #Done
     # view product
     Route::get('/product/{product}', [ProductController::class, 'show']); #Done
+    # view recommended products
+    Route::get('products/recommended', [RecomendedProductsController::class, 'index']);
     // Cart routes 
     # view user cart
     Route::get('/cart', [CartController::class, 'index']); #Done
@@ -87,6 +92,7 @@ Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('applicatio
     Route::get('/order/{order}', [OrderController::class, 'show']); #Done
     # take orders from cart 
     Route::post('/order/checkout', [OrderController::class, 'store']); #Done
+
 });
 
 // handle banners and offers announcement

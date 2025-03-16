@@ -64,11 +64,7 @@ class UserController extends Controller
                 'order_id' => 'required|string'
             ]);
 
-            $a = AssignedOrders::create([
-                'user_id' => $request->user_id,
-                'market_id' => $request->market_id,
-                'order_id' => $request->order_id,
-            ]);
+            $assign = AssignedOrders::create($validatedData);
             return response()->json(["message" => "update successfully"], 200);
         } catch (\Exception $error) {
             return response()->json(['message', $error->getMessage()], $error->getCode());

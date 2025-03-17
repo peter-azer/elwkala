@@ -60,6 +60,8 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::put('/order/edit/{id}', [AdminOrderController::class, 'update']); #Done
     Route::delete('/order/delete/{id}', [AdminOrderController::class, 'destroy']); #Done
     Route::post('/order/assign', [AdminUserController::class, 'assign']); # assign orders to representative
+    Route::delete('/order/unassign/{id}', [AdminUserController::class, 'unassign']); # unassign orders from representative
+    Route::post('/order/assigned', [AdminUserController::class, 'getAssignedOrders']); # show each representative orders
 });
 
 // Handel offers and sales #Done

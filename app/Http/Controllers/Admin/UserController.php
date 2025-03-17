@@ -78,6 +78,30 @@ class UserController extends Controller
         }
     }
 
+    public function unassign(string $id)
+    {
+        try {
+            $assign = AssignedOrders::findOrFail($id);
+            $assign->delete();
+            return response()->json(["message" => "delete successfully"], 200);
+        } catch (\Exception $error) {
+            return response()->json(['message', $error->getMessage()], $error->getCode());
+        }
+    }
+
+    public function getAssignedOrders(Request $request, $id)
+    {
+        try {
+            $assignedOrders = AssignedOrders::query()
+                ->where('user_id', $id)
+                ->with('order')
+                ->get();
+            return response()->json($assignedOrders);
+        } catch (\Exception $error) {
+            return response()->json(['error' => $error->getMessage()], 500);
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      */

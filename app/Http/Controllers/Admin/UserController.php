@@ -24,6 +24,13 @@ class UserController extends Controller
             ->get();
         return response()->json($users);
     }
+    public function getUsers()
+    {
+        $users = User::role(['user'])
+            ->with('roles')
+            ->get();
+        return response()->json($users);
+    }
 
     /**
      * Show the form for creating a new resource.

@@ -29,7 +29,8 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->group(function () {
 
 Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->group(function () {
     // users routes
-    Route::get('/users', [AdminUserController::class, 'index']); #Done
+    Route::get('/Admins', [AdminUserController::class, 'index']); #Done
+    Route::get('/users', [AdminUserController::class, 'getUsers']); #Done
     Route::put('/user/edit/{id}', [AdminUserController::class, 'update']); #Done
     Route::get('/user/markets/{id}', [AdminUserController::class, 'getUserMarkets']); #Done
     //areas routes

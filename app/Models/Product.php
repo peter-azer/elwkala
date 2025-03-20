@@ -12,6 +12,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id',
+        'brand_id',
         'product_name',
         'product_code',
         'product_image',
@@ -48,5 +49,9 @@ class Product extends Model
 
     public function recommended(){
         return $this->hasMany(RecomendedProducts::class, 'product_id');
+    }
+
+    public function brand(){
+        return $this->belongsTo(Brand::class, 'brand_id');
     }
 }

@@ -14,6 +14,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\BrandController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -53,6 +54,11 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::delete('/product/delete/{id}', [AdminProductController::class, 'destroy']); #Done
     Route::post('/product/assign', [RecomendedProductsController::class, 'store']);
     Route::delete('/product/unassign/{id}', [RecomendedProductsController::class, 'destroy']);
+    // Brands routes
+    Route::get('/brands', [BrandController::class, 'index']);
+    Route::get('/brand/{brand}', [BrandController::class, 'show']);
+    Route::post('/brand/create', [BrandController::class, 'store']);
+    Route::put('/brand/edit/{brand}', [BrandController::class, 'update']);
     // orders routes
     Route::get('/orders', [AdminOrderController::class, 'index']); #Done
     Route::get('/order/{id}', [AdminOrderController::class, 'show']); #Done
@@ -62,6 +68,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::post('/order/assign', [AdminUserController::class, 'assign']); # assign orders to representative
     Route::delete('/order/unassign/{id}', [AdminUserController::class, 'unassign']); # unassign orders from representative
     Route::post('/order/assigned', [AdminUserController::class, 'getAssignedOrders']); # show each representative orders
+    
 });
 
 // Handel offers and sales #Done

@@ -30,7 +30,7 @@ class CategoryController extends Controller
         try{
             $category = Category::query()
             ->where('id',$id)
-            ->with('product')
+            ->with('product', 'brands')
             ->get();
             return response()->json($category);
         }catch(\Exception $error){

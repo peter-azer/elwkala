@@ -56,7 +56,7 @@ class BrandController extends Controller
     public function show(Brand $brand)
     {
         try{
-            $brand = Brand::where('id', $brand->id)->with('products')->first();
+            $brand = Brand::where('id', $brand->id)->with('products', 'category')->first();
             return response()->json($brand, 200);
         }catch(\Exception $error){
             return response()->json(['message' => $error->getMessage()], $error->getCode());

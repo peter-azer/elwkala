@@ -28,6 +28,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->group(function () {
 });
 
 
+Route::post('/brand/create', [BrandController::class, 'store']);
 Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->group(function () {
     // users routes
     Route::get('/Admins', [AdminUserController::class, 'index']); #Done
@@ -57,7 +58,6 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     // Brands routes
     Route::get('/brands', [BrandController::class, 'index']);
     Route::get('/brand/{brand}', [BrandController::class, 'show']);
-    Route::post('/brand/create', [BrandController::class, 'store']);
     Route::put('/brand/edit/{brand}', [BrandController::class, 'update']);
     // orders routes
     Route::get('/orders', [AdminOrderController::class, 'index']); #Done

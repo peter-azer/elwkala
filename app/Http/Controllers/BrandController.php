@@ -28,6 +28,7 @@ class BrandController extends Controller
      */
     public function store(StoreBrandRequest $request)
     {
+        dd(auth()->user());
         try{
             $validatedData = $request->validate([
                 'category_id' => 'sometimes|exists:categories,id',

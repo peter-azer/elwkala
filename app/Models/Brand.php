@@ -11,6 +11,7 @@ class Brand extends Model
     use HasFactory;
 
     protected $fillable = [
+        'category_id',
         'brand_name',
         'brand_description',
         'brand_logo',

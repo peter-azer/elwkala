@@ -20,7 +20,7 @@ class BrandController extends Controller
             $brands = Brand::all();
             return response()->json($brands, 200);
         }catch(\Exception $error){
-            return response()->json(['message' => $error->getMessage()]);
+            return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }
     /**

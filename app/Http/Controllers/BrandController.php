@@ -32,7 +32,7 @@ class BrandController extends Controller
             $validatedData = $request->validate([
                 'category_id' => 'sometimes|exists:categories,id',
                 'brand_name' => 'required|string|max:255',
-                'brand_description' => 'required|sting',
+                'brand_description' => 'required|string',
                 'brand_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
 

@@ -12,16 +12,6 @@ class RolePermissionSeeder extends Seeder
 {
     public function run()
     {
-        // Create Permissions
-        $permissions = [
-            'create users',
-            'edit users',
-            'delete users',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
-        }
 
         // Create Roles and Assign Permissions
         $SuperAdminRole = Role::firstOrCreate(['name' => 'super admin']);

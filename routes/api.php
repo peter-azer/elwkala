@@ -56,7 +56,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::delete('/product/unassign/{id}', [RecomendedProductsController::class, 'destroy']);
     // Brands routes
     Route::get('/brands', [BrandController::class, 'index']);
-    Route::get('/brand/{brand}', [BrandController::class, 'show']);
+    Route::get('/brand/{id}', [BrandController::class, 'show']);
     Route::post('/brand/create', [BrandController::class, 'store']);
     Route::put('/brand/edit/{brand}', [BrandController::class, 'update']);
     // orders routes
@@ -68,7 +68,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::post('/order/assign', [AdminUserController::class, 'assign']); # assign orders to representative
     Route::delete('/order/unassign/{id}', [AdminUserController::class, 'unassign']); # unassign orders from representative
     Route::post('/order/assigned', [AdminUserController::class, 'getAssignedOrders']); # show each representative orders
-
+    
 });
 
 // Handel offers and sales #Done

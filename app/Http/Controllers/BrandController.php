@@ -16,10 +16,10 @@ class BrandController extends Controller
      */
     public function index()
     {
-        try{
+        try {
             $brands = Brand::all();
             return response()->json($brands, 200);
-        }catch(\Exception $error){
+        } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }
@@ -28,7 +28,7 @@ class BrandController extends Controller
      */
     public function store(StoreBrandRequest $request)
     {
-        try{
+        try {
             $validatedData = $request->validate([
                 'category_id' => 'sometimes|exists:categories,id',
                 'brand_name' => 'required|string|max:255',
@@ -36,8 +36,8 @@ class BrandController extends Controller
                 'brand_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
 
-            if($request->hasFile('brand_logo')){
-                $filePath = $request->file('brand_lgo')->store('brands', 'public');
+            if ($request->hasFile('brand_logo')) {
+                $filePath = $request->file('brand_logo')->store('brands', 'public');
                 $validatedData['brand_logo'] = URL::to(Storage::url($filePath));
             }
 
@@ -46,7 +46,7 @@ class BrandController extends Controller
                 'message' => 'Brand created successfully',
                 'brand' => $brand
             ], 201);
-        }catch(\Exception $error){
+        } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }
@@ -54,12 +54,12 @@ class BrandController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Brand $brand)
+    public function show(Brand $id)
     {
-        try{
-            $brand = Brand::where('id', $brand->id)->with('products', 'category')->first();
+        try {
+            $brand = Brand::where('id', $id->id)->with('products', 'category')->first();
             return response()->json($brand, 200);
-        }catch(\Exception $error){
+        } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }
@@ -69,15 +69,15 @@ class BrandController extends Controller
      */
     public function update(UpdateBrandRequest $request, Brand $brand)
     {
-        try{
+        try {
             $validatedData = $request->validate([
                 'category_id' => 'sometimes|exists:categories,id',
                 'brand_name' => 'required|string|max:255',
                 'brand_description' => 'required|text',
                 'brand_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
-            if($request->hasFile('brand_logo')){
-                if($brand->brand_logo){
+            if ($request->hasFile('brand_logo')) {
+                if ($brand->brand_logo) {
                     Storage::disk('public')->delete($brand->brand_logo);
                 }
                 $filePath = $request->file('brand_logo')->store('brands', 'public');
@@ -88,7 +88,7 @@ class BrandController extends Controller
                 'message' => 'Brand updated successfully',
                 'brand' => $brand
             ], 200);
-        }catch(\Exception $error){
+        } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }
@@ -98,8 +98,8 @@ class BrandController extends Controller
      */
     public function destroy(Brand $brand)
     {
-        try{
-            if($brand->brand_logo){
+        try {
+            if ($brand->brand_logo) {
                 Storage::disk('public')->delete($brand->brand_logo);
             }
 
@@ -107,7 +107,7 @@ class BrandController extends Controller
             return response()->json([
                 'message' => 'Brand deleted successfully',
             ], 200);
-        }catch(\Exception $error){
+        } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }

@@ -34,6 +34,7 @@ class ProductController extends Controller
         try {
             $validatedData = $request->validate([
                 'category_id' => 'integer|exists:categories,id',
+                'brand_id' => 'integer|exists:brands,id',
                 'product_name' => 'required|string',
                 // 'product_code' => 'required|string',
                 'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -72,6 +73,7 @@ class ProductController extends Controller
         try {
             $validatedData = $request->validate([
                 'category_id' => 'integer|exists:categories,id',
+                'brand_id' => 'integer|exists:brands,id',
                 'product_name' => 'required|string',
                 'product_code' => 'required|string',
                 'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',

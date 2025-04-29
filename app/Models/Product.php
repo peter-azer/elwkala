@@ -11,7 +11,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id',
+        'sub_category_id',
         'brand_id',
         'product_name',
         'product_code',
@@ -38,13 +38,14 @@ class Product extends Model
         $number = $latest ? intval(substr($latest->product_code, 5)) + 1 : 1;
         return 'PROD-' . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
-    public function category()
-    {
-        return $this->belongsTo(Category::class, 'category_id');
-    }
     public function cart()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
 
     public function recommended(){

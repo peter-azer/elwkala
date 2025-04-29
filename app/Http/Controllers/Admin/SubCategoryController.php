@@ -3,51 +3,46 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
+use App\Models\SubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 
-class CategoryController extends Controller
+class SubCategoryController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
         try{
-            $category = Category::all();
+            $category = SubCategory::all();
             return response()->json($category, 200);
         }catch(\Exception $error){
             return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }
 
-    public function show($id)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request, $id)
     {
-        try {
-            $category = Category::where('id', $id)->with('subCategory')->get();
-            return response()->json($category, 200);
-        } catch (\Exception $error) {
-            return response()->json(['message' => $error->getMessage()], $error->getCode());
-        }
-    }
-
-    public function store(Request $request)
-    {
-
         try {
             $validatedData = $request->validate([
-                'category_name' => 'required|string',
-                'category_cover' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'description' => 'required|string',
+                'name' => 'required|string',
+                'category_id' => 'required|integer|exists:categories,id',
+                'sub_category_cover' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
             // Handle image upload
             if ($request->hasFile('category_cover')) {
-                $imagePath = $request->file('category_cover')->store('categories', 'public');
+                $imagePath = $request->file('category_cover')->store('sub_categories', 'public');
                 $validatedData['category_cover'] = URL::to(Storage::url($imagePath));
             }
 
-            $category = Category::create($validatedData);
+            $category = SubCategory::create($validatedData);
 
             return response()->json(['message' => 'Category Created Successfully']);
         } catch (\Exception $e) {
@@ -55,29 +50,46 @@ class CategoryController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
     {
+        try {
+            $category = SubCategory::findOrFail($id);
+            return response()->json($category, 200);
+        } catch (\Exception $error) {
+            return response()->json(['message' => $error->getMessage()], $error->getCode());
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        
         // dd($request->all());
         try {
             $validatedData = $request->validate([
                 'category_name' => 'required|string',
-                'category_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'sub_category_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'description' => 'required|string',
             ]);
 
             // Find the category
-            $category = Category::findOrFail($id);
+            $category = SubCategory::findOrFail($id);
 
             // Handle image upload if present
-            if ($request->hasFile('category_cover')) {
+            if ($request->hasFile('sub_category_cover')) {
                 // Delete the old image if it exists
-                if ($category->category_cover) {
-                    Storage::disk('public')->delete($category->category_cover);
+                if ($category->sub_category_cover) {
+                    Storage::disk('public')->delete($category->sub_category_cover);
                 }
 
                 // Upload new image and update the path
-                $imagePath = $request->file('category_cover')->store('categories', 'public');
-                $validatedData['category_cover'] = URL::to(Storage::url($imagePath));
+                $imagePath = $request->file('sub_category_cover')->store('sub_categories', 'public');
+                $validatedData['sub_category_cover'] = URL::to(Storage::url($imagePath));
             }
 
             // Update category
@@ -89,12 +101,15 @@ class CategoryController extends Controller
         }
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
     {
         try {
-            $category = Category::findOrFail($id);
-            if ($category->category_cover) {
-                $imagePath = $category->category_cover;
+            $category = SubCategory::findOrFail($id);
+            if ($category->sub_category_cover) {
+                $imagePath = $category->sub_category_cover;
                 // Remove domain and '/storage' prefix
                 $cleanPath = Str::replaceFirst('/storage', '', parse_url($imagePath, PHP_URL_PATH));
                 // Delete the image from the public disk

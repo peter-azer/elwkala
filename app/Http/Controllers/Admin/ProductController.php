@@ -33,7 +33,7 @@ class ProductController extends Controller
         // dd($request->all);
         try {
             $validatedData = $request->validate([
-                'category_id' => 'integer|exists:categories,id',
+                'sub_category_id' => 'integer|exists:sub_categories,id',
                 'brand_id' => 'integer|exists:brands,id',
                 'product_name' => 'required|string',
                 // 'product_code' => 'required|string',

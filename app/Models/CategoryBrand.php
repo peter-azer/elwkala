@@ -8,7 +8,7 @@ class CategoryBrand extends Model
 {
     
     protected $fillable = [
-        'category_id',
+        'sub_category_id',
         'brand_id',
     ];
 

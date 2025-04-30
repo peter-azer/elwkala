@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\MarketController as AdminMarketController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\SubCategoryController as AdminSubCategoryController;
 use App\Http\Controllers\Admin\RecomendedProductsController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CartController;
@@ -46,6 +47,12 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::post('/category/create', [AdminCategoryController::class, 'store']); #Done
     Route::put('/category/edit/{id}', [AdminCategoryController::class, 'update']); #Done
     Route::delete('/category/delete/{id}', [AdminCategoryController::class, 'destroy']); #Done
+    // subcategory routes
+    Route::get('/subcategories', [AdminSubCategoryController::class, 'index']); #Done
+    Route::get('/subcategory/{id}', [AdminSubCategoryController::class, 'show']); #Done
+    Route::post('/subcategory/create', [AdminSubCategoryController::class, 'store']); #Done
+    Route::put('/subcategory/edit/{id}', [AdminSubCategoryController::class, 'update']); #Done
+    Route::delete('/subcategory/delete/{id}', [AdminSubCategoryController::class, 'destroy']); #Done
     // products routs
     Route::get('/products', [AdminProductController::class, 'index']); #Done
     Route::get('/product/{id}', [AdminProductController::class, 'show']); #Done

@@ -16,10 +16,10 @@ class SubCategoryController extends Controller
      */
     public function index()
     {
-        try{
+        try {
             $category = SubCategory::all();
             return response()->json($category, 200);
-        }catch(\Exception $error){
+        } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }
@@ -27,7 +27,7 @@ class SubCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $id)
+    public function store(Request $request)
     {
         try {
             $validatedData = $request->validate([
@@ -56,10 +56,10 @@ class SubCategoryController extends Controller
     public function show(string $id)
     {
         try {
-            $category = SubCategory::findOrFail($id);
+            $category = SubCategory::where('id', $id)->with('categoryBrands.brands', 'products')->get();
             return response()->json($category, 200);
         } catch (\Exception $error) {
-            return response()->json(['message' => $error->getMessage()], $error->getCode());
+            return response()->json(['message' => $error->getMessage()], 500);
         }
     }
 
@@ -68,13 +68,13 @@ class SubCategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        
+
         // dd($request->all());
         try {
             $validatedData = $request->validate([
-                'category_name' => 'required|string',
-                'sub_category_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'description' => 'required|string',
+                'name' => 'sometimes|string',
+                'category_id' => 'sometimes|integer|exists:categories,id',
+                'sub_category_cover' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
             // Find the category
@@ -114,7 +114,7 @@ class SubCategoryController extends Controller
                 $cleanPath = Str::replaceFirst('/storage', '', parse_url($imagePath, PHP_URL_PATH));
                 // Delete the image from the public disk
                 Storage::disk('public')->delete($cleanPath);
-                }
+            }
             $category->delete();
             return response()->json(["message" => "Deleted Successfully"]);
         } catch (\Exception $error) {

@@ -17,7 +17,7 @@ class SubCategoryController extends Controller
     public function index()
     {
         try {
-            $category = SubCategory::all();
+            $category = SubCategory::with('category')->get();
             return response()->json($category, 200);
         } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());
@@ -86,7 +86,6 @@ class SubCategoryController extends Controller
                 if ($category->sub_category_cover) {
                     Storage::disk('public')->delete($category->sub_category_cover);
                 }
-
                 // Upload new image and update the path
                 $imagePath = $request->file('sub_category_cover')->store('sub_categories', 'public');
                 $validatedData['sub_category_cover'] = URL::to(Storage::url($imagePath));

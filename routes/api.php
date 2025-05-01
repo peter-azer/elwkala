@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\SubCategoryController as AdminSubCategoryController;
+use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\Admin\RecomendedProductsController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CartController;
@@ -86,6 +87,9 @@ Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('applicatio
     Route::get('/categories', [CategoryController::class, 'index']); #Done  
     # show categories and related products
     Route::get('/category/product/{category}', [CategoryController::class, 'show']); #Done
+    # show subcategories
+    Route::get('/subcategories', [SubCategoryController::class, 'index']); #Done
+    Route::get('/subcategory/{id}', [SubCategoryController::class, 'show']); #Done
     // products routes
     # show all products
     Route::get('/products', [ProductController::class, 'index']); #Done

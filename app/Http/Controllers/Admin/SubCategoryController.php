@@ -37,9 +37,9 @@ class SubCategoryController extends Controller
             ]);
 
             // Handle image upload
-            if ($request->hasFile('category_cover')) {
-                $imagePath = $request->file('category_cover')->store('sub_categories', 'public');
-                $validatedData['category_cover'] = URL::to(Storage::url($imagePath));
+            if ($request->hasFile('sub_category_cover')) {
+                $imagePath = $request->file('sub_category_cover')->store('sub_categories', 'public');
+                $validatedData['sub_category_cover'] = URL::to(Storage::url($imagePath));
             }
 
             $category = SubCategory::create($validatedData);

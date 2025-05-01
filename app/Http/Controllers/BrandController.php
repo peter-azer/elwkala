@@ -19,7 +19,7 @@ class BrandController extends Controller
     public function index()
     {
         try {
-            $brands = Brand::all();
+            $brands = Brand::with('categoryBrands.subCategory', 'products')->get();
             return response()->json($brands, 200);
         } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());

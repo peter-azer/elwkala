@@ -56,7 +56,7 @@ class SubCategoryController extends Controller
     public function show(string $id)
     {
         try {
-            $category = SubCategory::where('id', $id)->with('categoryBrands.brands', 'products')->get();
+            $category = SubCategory::where('id', $id)->with('categoryBrands.brand', 'products')->get();
             return response()->json($category, 200);
         } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], 500);

@@ -41,7 +41,7 @@ class ProductController extends Controller
                 'description' => 'required|string',
                 'product_size' => 'required|string',
                 'product_pack_quantity' => 'required|integer',
-                'product_price' => 'required|integer',
+                'product_price' => 'required|numeric',
                 'offer_percentage' => 'nullable|integer',
                 'offer_percentage_price' => 'nullable|integer',
                 'quantity' => 'required|integer',

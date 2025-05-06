@@ -12,13 +12,14 @@ class Market extends Model
 
     protected $fillable = [
         'user_id',
-        'phone2',
-        'phone3',
+        'area_id'
         'owner_name',
         'manager_name',
         'market_name',
+        'phone2',
+        'phone3',
         'address',
-        'area_id'
+        'max_order_quantity',
     ];
 
     public function user()

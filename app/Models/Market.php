@@ -12,7 +12,7 @@ class Market extends Model
 
     protected $fillable = [
         'user_id',
-        'area_id'
+        'area_id',
         'owner_name',
         'manager_name',
         'market_name',

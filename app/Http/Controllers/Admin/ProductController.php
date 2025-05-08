@@ -42,7 +42,6 @@ class ProductController extends Controller
                 'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'description' => 'required|string',
                 'product_size' => 'required|string',
-                'quantity' => 'required|integer',
             ]);
 
             // Handle image upload

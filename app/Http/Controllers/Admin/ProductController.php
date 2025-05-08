@@ -127,6 +127,7 @@ class ProductController extends Controller
                         'pack_size' => 'sometimes|string',
                         'pack_name' => 'sometimes|string',
                         'pack_price' => 'sometimes|numeric',
+                        'quantity' => 'sometimes|numeric',
                         'pack_price_discount_percentage' => 'sometimes|numeric',
                         'pack_price_discount' => 'sometimes|numeric',
                     ])->validate();

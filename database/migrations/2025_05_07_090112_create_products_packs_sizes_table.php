@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('pack_size');
             $table->string('pack_name');
             $table->double('pack_price');
+            $table->double('quantity')->default(0);
             $table->double('pack_price_discount_percentage')->nullable();
             $table->double('pack_price_discount')->nullable();
             $table->timestamps();

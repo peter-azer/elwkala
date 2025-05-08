@@ -71,12 +71,22 @@ class OrderController extends Controller
 
                // Fetch product price from database
                $product = ProductsPacksSizes::findOrFail($validatedData['products_packs_sizes_id']);
+               // fetch product and decrease quantity
+               if($validatedData['quantity'] > 0) {
+                   if ($product->quantity < $validatedData['quantity']) {
+                       return response()->json(['error' => 'Insufficient product quantity'], 422);
+                   }else{
+                       $product->quantity -= $validatedData['quantity'];
+                       $product->save();
+                    }
+               }
                $itemPrice = $product->pack_price * $validatedData['quantity'];
                if($product->pack_price_discount_percentage == 0 || $product->pack_price_discount_percentage == null){
                    
                    $itemPrice = $product->pack_price * $validatedData['quantity'];
                }else{
-                   $itemPrice = $product->pack_price_discount_percentage * $validatedData['quantity'];
+                   $discountedPrice = $product->pack_price * (1 - ($product->pack_price_discount_percentage / 100));
+                   $itemPrice = $discountedPrice * $validatedData['quantity'];
                }
 
                // Add current item price to total order price

@@ -13,6 +13,7 @@ class Order extends Model
     protected $fillable = [
         'market_id',
         'product_id',
+        'products_packs_sizes_id',
         'order_id',
         'quantity',
         'total_order_price',
@@ -27,6 +28,10 @@ class Order extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+    public function productsPacksSizes()
+    {
+        return $this->belongsTo(ProductsPacksSizes::class, 'products_packs_sizes_id');
     }
 
 }

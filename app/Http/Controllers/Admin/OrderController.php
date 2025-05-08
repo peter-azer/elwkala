@@ -7,6 +7,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Services\OrderIdService;
 use App\Models\Product;
+use App\Models\ProductsPacksSizes;
 
 class OrderController extends Controller
 {
@@ -17,7 +18,7 @@ class OrderController extends Controller
     {
         try {
             $orders = Order::query()
-                ->with('market', 'product')
+                ->with('market', 'product', 'product.productsPacksSizes')
                 ->get();
             return response()->json($orders);
         } catch (\Exception $error) {
@@ -41,19 +42,20 @@ class OrderController extends Controller
                 $validatedData = validator($form, [
                     'market_id' => 'required|integer|exists:markets,id',
                     'product_id' => 'required|integer|exists:products,id',
+                    'products_packs_sizes_id' => 'required|integer|exists:products_packs_sizes,id',
                     'quantity' => 'required|integer|min:1',
                     'paid' => 'required|boolean',
                     'handed' => 'required|boolean',
                 ])->validate();
 
                 // Fetch product price from database
-                $product = Product::findOrFail($validatedData['product_id']);
-                $itemPrice = $product->product_price * $validatedData['quantity'];
-                if($product->offer_percentage_price == 0 || $product->offer_percentage_price == null){
+                $product = ProductsPacksSizes::findOrFail($validatedData['products_packs_sizes_id']);
+                $itemPrice = $product->pack_price * $validatedData['quantity'];
+                if($product->pack_price_discount_percentage == 0 || $product->pack_price_discount_percentage == null){
                     
-                    $itemPrice = $product->product_price * $validatedData['quantity'];
+                    $itemPrice = $product->pack_price * $validatedData['quantity'];
                 }else{
-                    $itemPrice = $product->offer_percentage_price * $validatedData['quantity'];
+                    $itemPrice = $product->pack_price_discount_percentage * $validatedData['quantity'];
                 }
 
                 // Add current item price to total order price
@@ -102,14 +104,15 @@ class OrderController extends Controller
             $validatedData = $request->validate([
                 'market_id' => 'required|integer|exists:markets,id',
                 'product_id' => 'required|integer|exists:products,id',
+                'products_packs_sizes_id' => 'required|integer|exists:products_packs_sizes,id',
                 'quantity' => 'required|integer|min:1',
                 'paid' => 'required|boolean',
                 'handed' => 'required|boolean',
             ]);
     
             // Fetch the product to calculate the total price
-            $product = Product::findOrFail($validatedData['product_id']);
-            $validatedData['total_order_price'] = $product->product_price * $validatedData['quantity'];
+            $product = ProductsPacksSizes::findOrFail($validatedData['products_packs_sizes_id']);
+            $validatedData['total_order_price'] = $product->pack_price * $validatedData['quantity'];
     
             // Update the order
             $order->update($validatedData);

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('market_id')->constrained('markets')->onDelete('cascade');
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('products_packs_sizes_id')->constrained('products_packs_sizes')->onDelete('cascade');
             $table->string('order_id');
             // $table->foreignId('address_id')->constrained('addresses')->onDelete('cascade');
             $table->integer('quantity')->default(1);

@@ -20,7 +20,7 @@ class CartController extends Controller
             ->first();
         $carts = Cart::query()
             ->where('market_id', $market->id)
-            ->with('product')
+            ->with(['product', 'product.productsPacksSizes'])
             ->get();
 
         // dd($carts);
@@ -37,6 +37,7 @@ class CartController extends Controller
             $validatedCart = $request->validate([
                 'market_id' => 'required|exists:markets,id',
                 'product_id' => 'required|exists:products,id',
+                'products_packs_sizes_id' => 'required|integer|exists:products_packs_sizes,id',
                 'quantity' => 'required|numeric|gt:0'
             ]);
 
@@ -56,6 +57,7 @@ class CartController extends Controller
             $validatedCart = $request->validate([
             'market_id' => 'nullable|exists:markets,id',
             'product_id' => 'nullable|exists:products,id',
+            'products_packs_sizes_id' => 'required|integer|exists:products_packs_sizes,id',
             'quantity' => 'required|numeric|gt:0'
             ]);
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductsPacksSizes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -14,7 +15,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $product = Product::all();
+        $product = Product::with('subCategory', 'brand', 'productsPacksSizes')->get();
         return response()->json($product, 200);
     }
 
@@ -30,20 +31,17 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all);
         try {
+
+            $packs = $request->input('packs');
+
             $validatedData = $request->validate([
                 'sub_category_id' => 'integer|exists:sub_categories,id',
                 'brand_id' => 'integer|exists:brands,id',
                 'product_name' => 'required|string',
-                // 'product_code' => 'required|string',
                 'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'description' => 'required|string',
                 'product_size' => 'required|string',
-                'product_pack_quantity' => 'required|integer',
-                'product_price' => 'required|numeric',
-                'offer_percentage' => 'nullable|integer',
-                'offer_percentage_price' => 'nullable|integer',
                 'quantity' => 'required|integer',
             ]);
 
@@ -53,13 +51,30 @@ class ProductController extends Controller
                 $validatedData['product_image'] = URL::to(Storage::url($imagePath));
             }
 
-            if ($validatedData['offer_percentage']) {
-                $validatedData['offer_percentage_price'] = $validatedData['product_price'] - (
-                    ($validatedData['offer_percentage'] / 100)
-                    * $validatedData['product_price']);
-            }
-
+            
             $product = Product::create($validatedData);
+            
+            // Validate and process each pack
+            if ($packs) {
+                foreach ($packs as $pack) {
+                    $pack['product_id'] = $product->id;
+                    $packData = validator($pack, [
+                        'product_id' => 'required|integer|exists:products,id',
+                        'product_pack_id' => 'required|integer|exists:products_packs,id',
+                        'pack_size' => 'required|string',
+                        'pack_name' => 'required|string',
+                        'pack_price' => 'required|numeric',
+                        'pack_price_discount_percentage' => 'nullable|numeric',
+                        'pack_price_discount' => 'nullable|numeric',
+                        ])->validate();
+                        if ($packData['pack_price_discount_percentage']) {
+                            $packData['pack_price_discount'] = $packData['pack_price'] - (
+                                ($packData['pack_price_discount_percentage'] / 100)
+                                * $packData['pack_price']);
+                        }
+                        $pack = ProductsPacksSizes::create($packData);
+                    }
+             }
 
             return response()->json(['message' => 'Product Created Successfully']);
         } catch (\Exception $e) {
@@ -69,47 +84,62 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        // dd($request->all());
         try {
+            $packs = $request->input('packs');
+
             $validatedData = $request->validate([
-                'category_id' => 'integer|exists:categories,id',
-                'brand_id' => 'integer|exists:brands,id',
-                'product_name' => 'required|string',
-                'product_code' => 'required|string',
-                'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'description' => 'required|string',
-                'product_size' => 'required|string',
-                'product_pack_quantity' => 'required|integer',
-                'product_price' => 'required|integer',
-                'offer_percentage' => 'nullable|integer',
-                'offer_percentage_price' => 'nullable|integer',
-                'quantity' => 'required|integer',
+                'sub_category_id' => 'sometimes|integer|exists:sub_categories,id',
+                'brand_id' => 'sometimes|integer|exists:brands,id',
+                'product_name' => 'sometimes|required|string',
+                'product_image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'description' => 'sometimes|required|string',
+                'product_size' => 'sometimes|required|string',
+                'quantity' => 'sometimes|required|integer',
             ]);
 
-            // Find the product
             $product = Product::findOrFail($id);
 
-            // Handle image upload if present
+            // Handle image upload
             if ($request->hasFile('product_image')) {
-                // Delete the old image if it exists
+                // Delete old image if exists
                 if ($product->product_image) {
-                    Storage::disk('public')->delete($product->product_cover);
+                    $imagePath = $product->product_image;
+                    $cleanPath = Str::replaceFirst('/storage', '', parse_url($imagePath, PHP_URL_PATH));
+                    Storage::disk('public')->delete($cleanPath);
                 }
 
-                // Upload new image and update the path
-                $imagePath = $request->file('product_cover')->store('products', 'public');
-                $validatedData['product_cover'] = URL::to(Storage::url($imagePath));
-            }
-            if ($validatedData['offer_percentage'] != 0) {
-                $validatedData['offer_percentage_price'] = $validatedData['product_price'] - (
-                    ($validatedData['offer_percentage'] / 100)
-                    * $validatedData['product_price']);
-            } else {
-                $validatedData['offer_percentage_price'] = 0;
+                $imagePath = $request->file('product_image')->store('products', 'public');
+                $validatedData['product_image'] = URL::to(Storage::url($imagePath));
             }
 
-            // Update product
             $product->update($validatedData);
+
+            // Validate and process each pack
+            if ($packs) {
+                // Delete existing packs for the product
+                ProductsPacksSizes::where('product_id', $product->id)->delete();
+
+                foreach ($packs as $pack) {
+                    $pack['product_id'] = $product->id;
+                    $packData = validator($pack, [
+                        'product_id' => 'sometimes|integer|exists:products,id',
+                        'product_pack_id' => 'sometimes|integer|exists:products_packs,id',
+                        'pack_size' => 'sometimes|string',
+                        'pack_name' => 'sometimes|string',
+                        'pack_price' => 'sometimes|numeric',
+                        'pack_price_discount_percentage' => 'sometimes|numeric',
+                        'pack_price_discount' => 'sometimes|numeric',
+                    ])->validate();
+
+                    if ($packData['pack_price_discount_percentage']) {
+                        $packData['pack_price_discount'] = $packData['pack_price'] - (
+                            ($packData['pack_price_discount_percentage'] / 100)
+                            * $packData['pack_price']);
+                    }
+
+                    ProductsPacksSizes::create($packData);
+                }
+            }
 
             return response()->json(['message' => 'Product Updated Successfully']);
         } catch (\Exception $e) {

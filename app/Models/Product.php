@@ -18,10 +18,6 @@ class Product extends Model
         'product_image',
         'description',
         'product_size',
-        'product_pack_quantity',
-        'product_price',
-        'offer_percentage',
-        'offer_percentage_price',
         'quantity',
     ];
     protected static function boot()
@@ -54,5 +50,10 @@ class Product extends Model
 
     public function brand(){
         return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    public function productsPacksSizes()
+    {
+        return $this->hasMany(ProductsPacksSizes::class, 'product_id');
     }
 }

@@ -20,8 +20,6 @@ return new class extends Migration
             $table->text('product_image');
             $table->text('description')->nullable();
             $table->string('product_size');
-            $table->integer('product_pack_quantity')->default(1)->nullable();
-            $table->double('product_price');
             $table->double('quantity')->default(0);
             $table->timestamps();
         });

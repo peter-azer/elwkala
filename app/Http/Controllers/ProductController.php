@@ -13,7 +13,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::all();
+        $products = Product::with('subCategory', 'brand', 'productsPacksSizes')->get();
         return response()->json($products);
     }
 
@@ -22,7 +22,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product = Product::where('id', $product->id)->with('category')->get();
+        $product = Product::where('id', $product->id)->with('subCategory', 'brand', 'productsPacksSizes')->get();
         try {
             return response()->json($product);
         } catch (\Exception $error) {

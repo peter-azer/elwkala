@@ -44,7 +44,7 @@ class CartController extends Controller
             $cart = Cart::create($validatedCart);
             return response()->json(['message' => 'added to cart']);
         } catch (\Exception $error) {
-            return response()->json(['message' => $error->getMessage()], $error->getCode());
+            return response()->json(['message' => $error->getMessage()], 500);
         }
     }
 

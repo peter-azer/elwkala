@@ -39,7 +39,7 @@ class ProductController extends Controller
                 'sub_category_id' => 'integer|exists:sub_categories,id',
                 'brand_id' => 'integer|exists:brands,id',
                 'product_name' => 'required|string',
-                'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'description' => 'required|string',
                 'product_size' => 'required|string',
             ]);

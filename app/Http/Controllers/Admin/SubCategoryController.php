@@ -33,7 +33,7 @@ class SubCategoryController extends Controller
             $validatedData = $request->validate([
                 'name' => 'required|string',
                 'category_id' => 'required|integer|exists:categories,id',
-                'sub_category_cover' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'sub_category_cover' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
 
             // Handle image upload
@@ -74,7 +74,7 @@ class SubCategoryController extends Controller
             $validatedData = $request->validate([
                 'name' => 'sometimes|string',
                 'category_id' => 'sometimes|integer|exists:categories,id',
-                'sub_category_cover' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'sub_category_cover' => 'sometimes|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
 
             // Find the category

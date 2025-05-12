@@ -31,4 +31,8 @@ class ProductsPacksSizes extends Model
     {
         return $this->hasMany(Order::class, 'products_packs_sizes_id');
     }
+    public function cart()
+    {
+        return $this->hasMany(Cart::class, 'products_packs_sizes_id');
+    }
 }

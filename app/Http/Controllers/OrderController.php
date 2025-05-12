@@ -62,6 +62,7 @@ class OrderController extends Controller
 
            foreach ($cart as $form) {
                $validatedData = validator($form, [
+                    'id' => 'required|integer|exists:carts,id',
                    'market_id' => 'required|integer|exists:markets,id',
                    'product_id' => 'required|integer|exists:products,id',
                    'products_packs_sizes_id' => 'required|integer|exists:products_packs_sizes,id',

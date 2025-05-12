@@ -13,6 +13,7 @@ class Cart extends Model
     protected $fillable = [
         'market_id',
         'product_id',
+        'products_packs_sizes_id',
         'quantity',
         'ordered'
     ];
@@ -24,5 +25,9 @@ class Cart extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+        public function productsPacksSizes()
+    {
+        return $this->belongsTo(ProductsPacksSizes::class, 'products_packs_sizes_id');
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Market;
 use App\Services\OrderIdService;
 use App\Models\Product;
 use App\Models\ProductsPacksSizes;
+use App\Models\Cart;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 
@@ -65,10 +66,14 @@ class OrderController extends Controller
                    'product_id' => 'required|integer|exists:products,id',
                    'products_packs_sizes_id' => 'required|integer|exists:products_packs_sizes,id',
                    'quantity' => 'required|integer|min:1',
-                   'paid' => 'required|boolean',
-                   'handed' => 'required|boolean',
+                   'paid' => 'sometimes|boolean',
+                   'handed' => 'sometimes|boolean',
                ])->validate();
-
+                // Make sure to update the cart item to mark it as ordered
+               $cartItem = Cart::findOrFail($form['id']);
+                $cartItem->update([
+                    'ordered' => true,
+                ]);
                // Fetch product price from database
                $product = ProductsPacksSizes::findOrFail($validatedData['products_packs_sizes_id']);
                // fetch product and decrease quantity

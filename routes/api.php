@@ -22,11 +22,11 @@ use App\Http\Controllers\BrandController;
 Route::get('/user', function (Request $request) {
     return response()->json(
         [
-            'user' => $request->user(), 
-            'role' => $request->user()->getRoleNames(), 
+            'user' => $request->user(),
+            'role' => $request->user()->getRoleNames(),
             'market' => $request->user()->market()->get()
-            ]
-        );
+        ]
+    );
 })->middleware('auth:sanctum');
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -89,7 +89,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::put('/pack/edit/{id}', [AdminProductsPacksController::class, 'update']); #Done
     Route::delete('/pack/delete/{id}', [AdminProductsPacksController::class, 'destroy']); #Done
 
-    
+
 });
 
 // Handel offers and sales #Done

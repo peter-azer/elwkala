@@ -20,7 +20,7 @@ class CartController extends Controller
             ->first();
         $carts = Cart::query()
             ->where('market_id', $market->id)
-            ->with(['product', 'product.productsPacksSizes'])
+            ->with(['product', 'productsPacksSizes'])
             ->get();
 
         // dd($carts);

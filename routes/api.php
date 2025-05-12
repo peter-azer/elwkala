@@ -74,6 +74,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::get('/brand/{id}', [BrandController::class, 'show']);
     Route::post('/brand/create', [BrandController::class, 'store']);
     Route::put('/brand/edit/{brand}', [BrandController::class, 'update']);
+    Route::delete('/brand/delete/{brand}', [BrandController::class, 'destroy']);
     // orders routes
     Route::get('/orders', [AdminOrderController::class, 'index']); #Done
     Route::get('/order/{id}', [AdminOrderController::class, 'show']); #Done

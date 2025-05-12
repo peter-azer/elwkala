@@ -20,7 +20,13 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BrandController;
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    return response()->json(
+        [
+            'user' => $request->user(), 
+            'role' => $request->user()->getRoleNames(), 
+            'market' => $request->user()->market()->get()
+            ]
+        );
 })->middleware('auth:sanctum');
 
 Route::post('/login', [AuthController::class, 'login']);

@@ -20,6 +20,7 @@ class CartController extends Controller
             ->first();
         $carts = Cart::query()
             ->where('market_id', $market->id)
+            ->where('ordered', false)
             ->with(['product', 'productsPacksSizes'])
             ->get();
 

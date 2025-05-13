@@ -31,8 +31,8 @@ class BrandController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'sub_category_id.*' => 'required|array',
                 'sub_category_id' => 'required|exists:sub_categories,id',
+                'sub_category_id.*' => 'required|array',
                 'brand_name' => 'required|string|max:255',
                 'brand_description' => 'required|string',
                 'brand_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',

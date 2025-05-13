@@ -35,7 +35,7 @@ class BrandController extends Controller
                 'sub_category_id.*' => 'required|exists:sub_categories,id',
                 'brand_name' => 'required|string|max:255',
                 'brand_description' => 'required|string',
-                'brand_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'brand_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
 
             if ($request->hasFile('brand_logo')) {

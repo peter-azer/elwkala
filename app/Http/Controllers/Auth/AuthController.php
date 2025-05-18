@@ -85,7 +85,7 @@ class AuthController extends Controller
             ]);
             $market->assignRole($request->role);
         } catch (\Exception $error) {
-            return response()->json(["message" => $error], $error->getCode());
+            return response()->json(["message" => $error], 500);
         }
     }
 

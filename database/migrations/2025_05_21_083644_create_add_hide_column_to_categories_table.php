@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->boolean('hide')->default(true);
+            $table->boolean('hide')->default(false);
         });
         Schema::table('sub_categories', function (Blueprint $table) {
-            $table->boolean('hide')->default(true);
+            $table->boolean('hide')->default(false);
         });
         Schema::table('products', function (Blueprint $table) {
-            $table->boolean('hide')->default(true);
+            $table->boolean('hide')->default(false);
         });
     }
 

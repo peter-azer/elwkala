@@ -14,7 +14,8 @@ class CategoryController extends Controller
     public function index()
     {
         try{
-            $categories = Category::all();
+            $categories = Category::where('hide', false)
+            ->get();
             return response()->json($categories);
         }catch(\Exception $error){
             return response()->json(['message'=> $error->getMessage()], $error->getCode());

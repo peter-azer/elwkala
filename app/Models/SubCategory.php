@@ -10,6 +10,8 @@ class SubCategory extends Model
         'name',
         'sub_category_cover',
         'category_id',
+        'hide',
+
     ];
 
     public function category()

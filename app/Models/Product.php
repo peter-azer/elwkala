@@ -19,6 +19,7 @@ class Product extends Model
         'description',
         'product_size',
         'quantity',
+        'hide',
     ];
     protected static function boot()
     {

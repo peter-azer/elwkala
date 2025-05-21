@@ -17,7 +17,8 @@ class SubCategoryController extends Controller
     public function index()
     {
         try {
-            $category = SubCategory::all();
+            $category = SubCategory::where('hide', false)
+            ->get();
             return response()->json($category, 200);
         } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());

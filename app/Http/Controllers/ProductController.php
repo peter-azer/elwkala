@@ -13,7 +13,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('subCategory', 'brand', 'productsPacksSizes', 'productsPacksSizes.productsPacks')->get();
+        $products = Product::where('hide', false)
+        ->with('subCategory', 'brand', 'productsPacksSizes', 'productsPacksSizes.productsPacks')
+        ->get();
         return response()->json($products);
     }
 

@@ -14,6 +14,7 @@ class Category extends Model
         'category_name',
         'category_cover',
         'description',
+        'hide',
     ];
 
     public function product(){

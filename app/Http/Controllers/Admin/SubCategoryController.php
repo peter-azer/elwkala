@@ -66,6 +66,18 @@ class SubCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
+        public function visibility($id)
+    {
+        try {
+            $sub_category = SubCategory::findOrFail($id);
+            $sub_category->hide = !$sub_category->hide;
+            $sub_category->save();
+
+            return response()->json(['message' => 'Sub-Category visibility updated successfully']);
+        } catch (\Exception $error) {
+            return response()->json(['message' => $error->getMessage()], 500);
+        }
+    }
     public function update(Request $request, string $id)
     {
 

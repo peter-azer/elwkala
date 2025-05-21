@@ -81,6 +81,18 @@ class ProductController extends Controller
         }
     }
 
+        public function visibility($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->hide = !$product->hide;
+            $product->save();
+
+            return response()->json(['message' => 'Product visibility updated successfully']);
+        } catch (\Exception $error) {
+            return response()->json(['message' => $error->getMessage()], 500);
+        }
+    }
     public function update(Request $request, $id)
     {
         try {

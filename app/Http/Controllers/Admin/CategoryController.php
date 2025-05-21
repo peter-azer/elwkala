@@ -55,6 +55,18 @@ class CategoryController extends Controller
         }
     }
 
+    public function visibility($id)
+    {
+        try {
+            $category = Category::findOrFail($id);
+            $category->hide = !$category->hide;
+            $category->save();
+
+            return response()->json(['message' => 'Category visibility updated successfully']);
+        } catch (\Exception $error) {
+            return response()->json(['message' => $error->getMessage()], 500);
+        }
+    }
     public function update(Request $request, $id)
     {
         // dd($request->all());

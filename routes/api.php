@@ -55,18 +55,21 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::post('/category/create', [AdminCategoryController::class, 'store']); #Done
     Route::put('/category/edit/{id}', [AdminCategoryController::class, 'update']); #Done
     Route::delete('/category/delete/{id}', [AdminCategoryController::class, 'destroy']); #Done
+    Route::delete('/category/visibility/{id}', [AdminCategoryController::class, 'visibility']); #Done
     // subcategory routes
     Route::get('/subcategories', [AdminSubCategoryController::class, 'index']); #Done
     Route::get('/subcategory/{id}', [AdminSubCategoryController::class, 'show']); #Done
     Route::post('/subcategory/create', [AdminSubCategoryController::class, 'store']); #Done
     Route::put('/subcategory/edit/{id}', [AdminSubCategoryController::class, 'update']); #Done
     Route::delete('/subcategory/delete/{id}', [AdminSubCategoryController::class, 'destroy']); #Done
+    Route::delete('/subcategory/visibility/{id}', [AdminSubCategoryController::class, 'visibility']); #Done
     // products routs
     Route::get('/products', [AdminProductController::class, 'index']); #Done
     Route::get('/product/{id}', [AdminProductController::class, 'show']); #Done
     Route::post('/product/create', [AdminProductController::class, 'store']); #Done
     Route::put('/product/edit/{id}', [AdminProductController::class, 'update']); #Done
     Route::delete('/product/delete/{id}', [AdminProductController::class, 'destroy']); #Done
+    Route::delete('/product/visibility/{id}', [AdminProductController::class, 'visibility']); #Done
     Route::post('/product/assign', [RecomendedProductsController::class, 'store']);
     Route::delete('/product/unassign/{id}', [RecomendedProductsController::class, 'destroy']);
     // Brands routes

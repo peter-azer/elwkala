@@ -15,6 +15,7 @@ class CategoryController extends Controller
     {
         try{
             $categories = Category::where('hide', false)
+            ->orderBy('order', 'asc')
             ->get();
             return response()->json($categories);
         }catch(\Exception $error){

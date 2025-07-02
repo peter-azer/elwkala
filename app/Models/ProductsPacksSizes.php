@@ -14,6 +14,7 @@ class ProductsPacksSizes extends Model
         'pack_size',
         'pack_name',
         'pack_price',
+        'quantity',
         'pack_price_discount_percentage',
         'pack_price_discount',
     ];

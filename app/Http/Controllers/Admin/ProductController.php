@@ -50,9 +50,9 @@ class ProductController extends Controller
                 $validatedData['product_image'] = URL::to(Storage::url($imagePath));
             }
 
-            
+
             $product = Product::create($validatedData);
-            
+
             // Validate and process each pack
             if ($packs) {
                 foreach ($packs as $pack) {
@@ -63,6 +63,7 @@ class ProductController extends Controller
                         'pack_size' => 'required|string',
                         'pack_name' => 'required|string',
                         'pack_price' => 'required|numeric',
+                        'quantity' => 'required|numeric',
                         'pack_price_discount_percentage' => 'nullable|numeric',
                         'pack_price_discount' => 'nullable|numeric',
                         ])->validate();

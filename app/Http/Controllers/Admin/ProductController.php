@@ -43,6 +43,7 @@ class ProductController extends Controller
             $validatedData = $request->validate([
                 'sub_category_id' => 'integer|exists:sub_categories,id',
                 'brand_id' => 'integer|exists:brands,id',
+                'product_code' => 'required|string|unique:products,product_code',
                 'product_name' => 'required|string',
                 'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'description' => 'required|string',

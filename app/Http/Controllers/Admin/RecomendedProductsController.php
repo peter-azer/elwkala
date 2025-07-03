@@ -6,15 +6,16 @@ use App\Models\RecomendedProducts;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRecomendedProductsRequest;
 use App\Http\Requests\UpdateRecomendedProductsRequest;
+use App\Models\Product;
 
 class RecomendedProductsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($id)
     {
-        $recommended = RecomendedProducts::all();
+        $recommended = Product::where('sub_category_id', $id)->inRandomOrder()->take(9)->get();
         return response()->json($recommended, 200);
     }
 
@@ -39,11 +40,11 @@ class RecomendedProductsController extends Controller
      */
     public function destroy($id)
     {
-        try{
+        try {
             $recommended = RecomendedProducts::findOrFail($id);
             $recommended->delete();
             return response()->json(['message' => 'Recommended product deleted successfully'], 200);
-        }catch(\Exception $error){
+        } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());
         }
     }

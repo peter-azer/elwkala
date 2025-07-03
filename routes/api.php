@@ -113,7 +113,7 @@ Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('applicatio
     # view product
     Route::get('/product/{product}', [ProductController::class, 'show']); #Done
     # view recommended products
-    Route::get('products/recommended', [RecomendedProductsController::class, 'index']);
+    Route::get('products/recommended/{id}', [RecomendedProductsController::class, 'index']);
     // brand routes
     Route::get('/brands', [BrandController::class, 'index']);
     Route::get('/brand/{brand}', [BrandController::class, 'show']);

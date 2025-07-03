@@ -19,7 +19,7 @@ class CategoryController extends Controller
             ->get();
             return response()->json($categories);
         }catch(\Exception $error){
-            return response()->json(['message'=> $error->getMessage()], $error->getCode());
+            return response()->json(['message'=> $error->getMessage()], 500);
 
         }
     }
@@ -36,7 +36,7 @@ class CategoryController extends Controller
             ->get();
             return response()->json($category);
         }catch(\Exception $error){
-            return response()->json(['message'=>$error->getMessage()], $error->getCode());
+            return response()->json(['message'=>$error->getMessage()], 500);
         }
     }
 

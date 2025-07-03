@@ -32,6 +32,11 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try {
+            // Generate unique product code
+            $latestProduct = Product::latest()->first();
+            $number = $latestProduct && $latestProduct->product_code ? intval(substr($latestProduct->product_code, 5)) + 1: 1;
+            $productCode = 'PROD-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+            $request->merge(['product_code' => $productCode]);
 
             $packs = $request->input('packs');
 

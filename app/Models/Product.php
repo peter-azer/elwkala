@@ -21,20 +21,7 @@ class Product extends Model
         'quantity',
         'hide',
     ];
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($product) {
-            $product->product_code = self::generateProductId();
-        });
-    }
 
-    public static function generateProductId()
-    {
-        $latest = self::latest()->first();
-        $number = $latest ? intval(substr($latest->product_code, 5)) + 1 : 1;
-        return 'PROD-' . str_pad($number, 4, '0', STR_PAD_LEFT);
-    }
     public function cart()
     {
         return $this->belongsTo(Category::class);

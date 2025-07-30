@@ -44,4 +44,9 @@ class Product extends Model
     {
         return $this->hasMany(ProductsPacksSizes::class, 'product_id');
     }
+
+    public function banners()
+    {
+        return $this->hasMany(Banner::class, 'product_id');
+    }
 }

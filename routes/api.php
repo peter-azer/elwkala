@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\SubCategoryController as AdminSubCategoryController;
 use App\Http\Controllers\Admin\ProductsPacksController as AdminProductsPacksController;
+use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\Admin\RecomendedProductsController;
 use App\Http\Controllers\AreaController;
@@ -92,6 +93,11 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::post('/pack/create', [AdminProductsPacksController::class, 'store']); #Done
     Route::put('/pack/edit/{id}', [AdminProductsPacksController::class, 'update']); #Done
     Route::delete('/pack/delete/{id}', [AdminProductsPacksController::class, 'destroy']); #Done
+    // handle banners
+    Route::get('/banners', [AdminBannerController::class, 'index']); #Done
+    Route::post('/banner/create', [AdminBannerController::class, 'store']); #Done
+    Route::put('/banner/edit/{banner}', [AdminBannerController::class, 'update']); #Done
+    Route::delete('/banner/delete/{banner}', [AdminBannerController::class, 'destroy']); #Done
 
 
 });

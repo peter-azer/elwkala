@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\SubCategoryController as AdminSubCategoryController;
 use App\Http\Controllers\Admin\ProductsPacksController as AdminProductsPacksController;
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\Admin\RecomendedProductsController;
 use App\Http\Controllers\AreaController;
@@ -139,8 +140,7 @@ Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('applicatio
     Route::get('/order/{order}', [OrderController::class, 'show']); #Done
     # take orders from cart 
     Route::post('/order/checkout', [OrderController::class, 'store']); #Done
+    # banners
+    Route::get('/banners', [BannerController::class, 'index']); #Done
 
 });
-
-// handle banners and offers announcement
-// handle representatives

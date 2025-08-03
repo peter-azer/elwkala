@@ -97,7 +97,7 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->whith('market', 'product', 'productsPacksSizes')->get();
             return response()->json($order, 200);
         } catch (\Exception $error) {
-            return response()->json(['error' => $error->getMessage()], $error->getCode(), 500);
+            return response()->json(['error' => $error->getMessage()], 500);
         }
     }
 

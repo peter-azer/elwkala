@@ -94,7 +94,7 @@ class OrderController extends Controller
     public function show(string $id)
     {
         try {
-            $order = Order::findOrFail($id);
+            $order = Order::where('id', $id)->whith('market', 'product', 'productsPacksSizes')->get();
             return response()->json($order, 200);
         } catch (\Exception $error) {
             return response()->json(['error' => $error->getMessage()], $error->getCode());

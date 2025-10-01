@@ -169,6 +169,27 @@ class OrderController extends Controller
     }
     }
 
+    public function handedToggler($id){
+        try{
+            $order = Order::findOrFail($id);
+            $order->handed = !$order->handed;
+            $order->save();
+            return response()->json(['message' => 'Order handed status toggled successfully', 'handed' => $order->handed], 200);
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    public function paidToggler($id){
+        try{
+            $order = Order::findOrFail($id);
+            $order->paid = !$order->paid;
+            $order->save();
+            return response()->json(['message' => 'Order paid status toggled successfully', 'paid' => $order->paid], 200);
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      */

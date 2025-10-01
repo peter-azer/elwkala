@@ -83,6 +83,8 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     // orders routes
     Route::get('/orders', [AdminOrderController::class, 'index']); #Done
     Route::get('/order/{id}', [AdminOrderController::class, 'show']); #Done
+    Route::get('/order/handed/{id}', [AdminOrderController::class, 'handedToggler']); #Done
+    Route::get('/order/paid/{id}', [AdminOrderController::class, 'paidToggler']); #Done
     Route::post('/order/create', [AdminOrderController::class, 'store']); #Done
     Route::put('/order/edit/{id}', [AdminOrderController::class, 'update']); #Done
     Route::delete('/order/delete/{id}', [AdminOrderController::class, 'destroy']); #Done

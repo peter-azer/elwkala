@@ -22,7 +22,7 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::findOrFail($id);
+            $product = Product::with('subCategory', 'brand', 'productsPacksSizes', 'productsPacksSizes.productsPacks')->findOrFail($id);
             return response()->json($product, 200);
         } catch (\Exception $error) {
             return response()->json(['message' => $error->getMessage()], $error->getCode());

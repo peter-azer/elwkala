@@ -127,24 +127,105 @@ class AnalysisController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function categoryAnalysis()
+    /**
+     * Get category-wise sales analysis with subcategories and brands
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function categoryAnalysis(Request $request)
     {
-        $categories = Category::withCount('products')
-            ->leftJoin('products', 'categories.id', '=', 'products.category_id')
-            ->leftJoin('orders', 'products.id', '=', 'orders.product_id')
+        $startDate = $request->input('start_date', Carbon::now()->subMonth());
+        $endDate = $request->input('end_date', Carbon::now());
+        $withSubcategories = $request->boolean('with_subcategories', false);
+        $withBrands = $request->boolean('with_brands', false);
+
+        $query = Category::query()
+            ->withCount('products')
+            ->leftJoin('sub_categories', 'categories.id', '=', 'sub_categories.category_id')
+            ->leftJoin('products', function($join) use ($startDate, $endDate) {
+                $join->on('sub_categories.id', '=', 'products.sub_category_id')
+                    ->whereNull('products.deleted_at');
+            })
+            ->leftJoin('orders', function($join) use ($startDate, $endDate) {
+                $join->on('products.id', '=', 'orders.product_id')
+                    ->whereBetween('orders.created_at', [$startDate, $endDate]);
+            })
             ->select(
-                'categories.*',
+                'categories.id',
+                'categories.category_name',
+                'categories.category_cover',
                 DB::raw('COUNT(DISTINCT products.id) as products_count'),
+                DB::raw('COUNT(DISTINCT sub_categories.id) as subcategories_count'),
                 DB::raw('COALESCE(SUM(orders.total_order_price), 0) as total_revenue'),
-                DB::raw('COALESCE(SUM(orders.quantity), 0) as total_quantity_sold')
+                DB::raw('COALESCE(SUM(orders.quantity), 0) as total_quantity_sold'),
+                DB::raw('COUNT(DISTINCT orders.id) as orders_count')
             )
-            ->groupBy('categories.id')
-            ->orderBy('total_revenue', 'desc')
-            ->get();
+            ->groupBy('categories.id', 'categories.category_name', 'categories.category_cover')
+            ->orderBy('total_revenue', 'desc');
+
+        // Add subcategory data if requested
+        if ($withSubcategories) {
+            $query->with(['subCategories' => function($query) use ($startDate, $endDate) {
+                $query->withCount('products')
+                    ->with(['products' => function($q) use ($startDate, $endDate) {
+                        $q->withCount(['orders as orders_count' => function($q) use ($startDate, $endDate) {
+                            $q->whereBetween('orders.created_at', [$startDate, $endDate]);
+                        }])
+                        ->withSum(['orders as total_revenue' => function($q) use ($startDate, $endDate) {
+                            $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                                ->select(DB::raw('COALESCE(SUM(total_order_price), 0)'));
+                        }])
+                        ->withSum(['orders as total_quantity_sold' => function($q) use ($startDate, $endDate) {
+                            $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                                ->select(DB::raw('COALESCE(SUM(quantity), 0)'));
+                        }]);
+                    }])
+                    ->withCount(['orders as orders_count' => function($q) use ($startDate, $endDate) {
+                        $q->whereBetween('orders.created_at', [$startDate, $endDate]);
+                    }])
+                    ->withSum(['orders as total_revenue' => function($q) use ($startDate, $endDate) {
+                        $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                            ->select(DB::raw('COALESCE(SUM(orders.total_order_price), 0)'));
+                    }])
+                    ->withSum(['orders as total_quantity_sold' => function($q) use ($startDate, $endDate) {
+                        $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                            ->select(DB::raw('COALESCE(SUM(orders.quantity), 0)'));
+                    }])
+                    ->orderBy('total_revenue', 'desc');
+            }]);
+        }
+
+        // Add brand data if requested
+        if ($withBrands) {
+            $query->with(['brands' => function($query) use ($startDate, $endDate) {
+                $query->withCount('products')
+                    ->withCount(['products.orders as orders_count' => function($q) use ($startDate, $endDate) {
+                        $q->whereBetween('orders.created_at', [$startDate, $endDate]);
+                    }])
+                    ->withSum(['products.orders as total_revenue' => function($q) use ($startDate, $endDate) {
+                        $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                            ->select(DB::raw('COALESCE(SUM(orders.total_order_price), 0)'));
+                    }])
+                    ->withSum(['products.orders as total_quantity_sold' => function($q) use ($startDate, $endDate) {
+                        $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                            ->select(DB::raw('COALESCE(SUM(orders.quantity), 0)'));
+                    }])
+                    ->orderBy('total_revenue', 'desc');
+            }]);
+        }
+
+        $categories = $query->get();
 
         return response()->json([
             'status' => 'success',
-            'data' => $categories
+            'data' => $categories,
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'with_subcategories' => $withSubcategories,
+                'with_brands' => $withBrands
+            ]
         ]);
     }
 

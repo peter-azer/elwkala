@@ -140,8 +140,9 @@ class AnalysisController extends Controller
         $withSubcategories = $request->boolean('with_subcategories', false);
         $withBrands = $request->boolean('with_brands', false);
 
+        // First, get the base category query with counts
         $query = Category::query()
-            ->withCount('products')
+            ->withCount('subCategory') // Count subcategories directly through the relationship
             ->leftJoin('sub_categories', 'categories.id', '=', 'sub_categories.category_id')
             ->leftJoin('products', 'sub_categories.id', '=', 'products.sub_category_id')
             ->leftJoin('orders', function($join) use ($startDate, $endDate) {
@@ -154,8 +155,13 @@ class AnalysisController extends Controller
                 'categories.category_cover',
                 'categories.description',
                 'categories.hide',
-                DB::raw('COUNT(DISTINCT products.id) as products_count'),
+                // Count products through subcategories
+                DB::raw('(SELECT COUNT(DISTINCT p.id) FROM products p 
+                          INNER JOIN sub_categories sc ON p.sub_category_id = sc.id 
+                          WHERE sc.category_id = categories.id) as products_count'),
+                // Count distinct subcategories
                 DB::raw('COUNT(DISTINCT sub_categories.id) as subcategories_count'),
+                // Calculate revenue and orders
                 DB::raw('COALESCE(SUM(orders.total_order_price), 0) as total_revenue'),
                 DB::raw('COALESCE(SUM(orders.quantity), 0) as total_quantity_sold'),
                 DB::raw('COUNT(DISTINCT orders.id) as orders_count')

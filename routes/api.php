@@ -20,6 +20,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\AnalysisController;
 
 Route::get('/user', function (Request $request) {
     return response()->json(
@@ -44,6 +45,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::get('/Admins', [AdminUserController::class, 'index']); #Done
     Route::get('/users', [AdminUserController::class, 'getUsers']); #Done
     Route::put('/user/edit/{id}', [AdminUserController::class, 'update']); #Done
+    Route::delete('/user/delete/{id}', [AdminUserController::class, 'destroy']); #Done
     Route::get('/user/markets/{id}', [AdminUserController::class, 'getUserMarkets']); #Done
     //areas routes
     Route::get('/areas', [AreaController::class, 'index']);
@@ -101,6 +103,15 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::post('/banner/create', [AdminBannerController::class, 'store']); #Done
     Route::put('/banner/edit/{banner}', [AdminBannerController::class, 'update']); #Done
     Route::delete('/banner/delete/{banner}', [AdminBannerController::class, 'destroy']); #Done
+
+    Route::prefix('analytics')->group(function () {
+    Route::get('/sales', [AnalysisController::class, 'salesAnalysis']);
+    Route::get('/products/performance', [AnalysisController::class, 'productPerformance']);
+    Route::get('/markets/performance', [AnalysisController::class, 'marketPerformance']);
+    Route::get('/categories', [AnalysisController::class, 'categoryAnalysis']);
+    Route::get('/orders/status-distribution', [AnalysisController::class, 'orderStatusAnalysis']);
+    Route::get('/financial-reports', [AnalysisController::class, 'financialReports']);
+});
 
 
 });

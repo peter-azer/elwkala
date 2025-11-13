@@ -333,7 +333,8 @@ class AnalysisController extends Controller
         // Get category performance
         $categoryPerformance = DB::table('orders')
             ->join('products', 'orders.product_id', '=', 'products.id')
-            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->join('sub_categories', 'products.sub_category_id', '=', 'sub_categories.id')
+            ->join('categories', 'sub_categories.category_id', '=', 'categories.id')
             ->select(
                 'categories.id as category_id',
                 'categories.category_name',
@@ -341,13 +342,16 @@ class AnalysisController extends Controller
                 DB::raw('SUM(orders.total_order_price) as total_revenue'),
                 DB::raw('SUM(orders.quantity) as total_quantity_sold')
             )
-            ->whereBetween('orders.created_at', [$startDate, $endDate]);
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->whereNull('products.deleted_at')
+            ->whereNull('sub_categories.deleted_at')
+            ->whereNull('categories.deleted_at');
 
         if ($marketId) {
             $categoryPerformance->where('orders.market_id', $marketId);
         }
         if ($categoryId) {
-            $categoryPerformance->where('products.category_id', $categoryId);
+            $categoryPerformance->where('categories.id', $categoryId);
         }
 
         $categoryPerformance = $categoryPerformance

@@ -17,9 +17,6 @@ class Category extends Model
         'hide',
     ];
 
-    public function product(){
-        return $this->hasMany(Product::class);
-    }
     public function subCategory(){
         return $this->hasMany(SubCategory::class);
     }

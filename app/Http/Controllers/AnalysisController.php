@@ -27,9 +27,9 @@ class AnalysisController extends Controller
         $salesData = Order::whereBetween('created_at', [$startDate, $endDate])
             ->select(
                 DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as total_order'),
-                DB::raw('SUM(total_amount) as total_sales'),
-                DB::raw('AVG(total_amount) as average_order_value')
+                DB::raw('COUNT(DISTINCT order_id) as total_orders'),
+                DB::raw('SUM(total_order_price) as total_sales'),
+                DB::raw('AVG(total_order_price) as average_order_value')
             )
             ->groupBy('date')
             ->orderBy('date')
@@ -57,13 +57,15 @@ class AnalysisController extends Controller
         $categoryId = $request->input('category_id');
         $brandId = $request->input('brand_id');
 
-        $query = Product::with(['category', 'brand', 'productsPacksSizes'])
+        $query = Product::with(['brand', 'productsPacksSizes'])
+            ->leftJoin('orders', 'products.id', '=', 'orders.product_id')
             ->select(
                 'products.*',
-                DB::raw('COUNT(order.id) AS times_ordered'),
-                DB::raw('COALESCE(SUM(order.quantity), 0) AS total_quantity_sold'),
-                DB::raw('COALESCE(SUM(products.price * order.quantity), 0) AS total_revenue')
+                DB::raw('COUNT(DISTINCT orders.id) AS times_ordered'),
+                DB::raw('COALESCE(SUM(orders.quantity), 0) AS total_quantity_sold'),
+                DB::raw('COALESCE(SUM(orders.total_order_price), 0) AS total_revenue')
             )
+            ->groupBy('products.id')
             ->orderBy('times_ordered', 'desc');
 
         if ($categoryId) {
@@ -99,12 +101,15 @@ class AnalysisController extends Controller
         $endDate = $request->input('end_date', Carbon::now());
 
         $marketPerformance = Market::with(['area'])
+            ->leftJoin('orders', 'markets.id', '=', 'orders.market_id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->select(
                 'markets.*',
-                DB::raw('(SELECT COUNT(*) FROM order WHERE order.market_id = markets.id AND order.created_at BETWEEN ? AND ?) as total_order')
+                DB::raw('COUNT(DISTINCT orders.id) as total_orders'),
+                DB::raw('COALESCE(SUM(orders.total_order_price), 0) as total_revenue')
             )
-            ->addBinding([$startDate, $endDate], 'select')
-            ->orderBy('total_order', 'desc')
+            ->groupBy('markets.id')
+            ->orderBy('total_orders', 'desc')
             ->get();
 
         return response()->json([
@@ -125,10 +130,16 @@ class AnalysisController extends Controller
     public function categoryAnalysis()
     {
         $categories = Category::withCount('products')
-            ->withSum(['products' => function ($query) {
-                $query->select(DB::raw('COALESCE(SUM(price * (SELECT SUM(quantity) FROM order WHERE order.product_id = products.id)), 0)'));
-            }], 'price')
-            ->orderBy('products_sum_price', 'desc')
+            ->leftJoin('products', 'categories.id', '=', 'products.category_id')
+            ->leftJoin('orders', 'products.id', '=', 'orders.product_id')
+            ->select(
+                'categories.*',
+                DB::raw('COUNT(DISTINCT products.id) as products_count'),
+                DB::raw('COALESCE(SUM(orders.total_order_price), 0) as total_revenue'),
+                DB::raw('COALESCE(SUM(orders.quantity), 0) as total_quantity_sold')
+            )
+            ->groupBy('categories.id')
+            ->orderBy('total_revenue', 'desc')
             ->get();
 
         return response()->json([
@@ -142,16 +153,17 @@ class AnalysisController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function ordertatusAnalysis()
+    public function orderStatusAnalysis()
     {
         $statusDistribution = Order::select(
-            'status',
+            'handled as status',
             DB::raw('COUNT(*) as count')
         )
-            ->groupBy('status')
+            ->groupBy('handled')
             ->get()
             ->mapWithKeys(function ($item) {
-                return [$item->status => $item->count];
+                $status = $item->status ? 'handled' : 'pending';
+                return [$status => $item->count];
             });
 
         return response()->json([
@@ -208,15 +220,15 @@ class AnalysisController extends Controller
 
         // Get product performance data
         $productPerformance = (clone $query)
-            ->join('products', 'order.product_id', '=', 'products.id')
-            ->join('products_packs_sizes', 'order.products_packs_sizes_id', '=', 'products_packs_sizes.id')
+            ->join('products', 'orders.product_id', '=', 'products.id')
+            ->leftJoin('products_packs_sizes', 'orders.products_packs_sizes_id', '=', 'products_packs_sizes.id')
             ->select(
                 'products.id as product_id',
                 'products.name as product_name',
-                DB::raw('SUM(order.quantity) as total_quantity_sold'),
-                DB::raw('SUM(order.total_order_price) as total_revenue'),
-                DB::raw('SUM(products_packs_sizes.pack_price * order.quantity) as total_retail_value'),
-                DB::raw('SUM(order.total_order_price - (products_packs_sizes.pack_price * order.quantity)) as total_profit')
+                DB::raw('SUM(orders.quantity) as total_quantity_sold'),
+                DB::raw('SUM(orders.total_order_price) as total_revenue'),
+                DB::raw('COALESCE(SUM(products_packs_sizes.pack_price * orders.quantity), 0) as total_retail_value'),
+                DB::raw('SUM(orders.total_order_price - COALESCE(products_packs_sizes.pack_price * orders.quantity, 0)) as total_profit')
             )
             ->groupBy('products.id', 'products.name')
             ->orderBy('total_revenue', 'desc')
@@ -225,14 +237,14 @@ class AnalysisController extends Controller
 
         // Get category performance
         $categoryPerformance = (clone $query)
-            ->join('products', 'order.product_id', '=', 'products.id')
+            ->join('products', 'orders.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->select(
                 'categories.id as category_id',
                 'categories.name as category_name',
-                DB::raw('COUNT(DISTINCT order.order_id) as order_count'),
-                DB::raw('SUM(order.total_order_price) as total_revenue'),
-                DB::raw('SUM(order.quantity) as total_quantity_sold')
+                DB::raw('COUNT(DISTINCT orders.order_id) as order_count'),
+                DB::raw('SUM(orders.total_order_price) as total_revenue'),
+                DB::raw('SUM(orders.quantity) as total_quantity_sold')
             )
             ->groupBy('categories.id', 'categories.name')
             ->orderBy('total_revenue', 'desc')
@@ -297,16 +309,16 @@ class AnalysisController extends Controller
                 'group_by' => $groupBy
             ],
             'summary' => [
-                'total_order' => $paymentSummary ? $paymentSummary->paid_order + $paymentSummary->unpaid_order : 0,
+                'total_orders' => $paymentSummary ? $paymentSummary->paid_orders + $paymentSummary->unpaid_orders : 0,
                 'total_revenue' => $paymentSummary ? $paymentSummary->total_paid_amount + $paymentSummary->total_unpaid_amount : 0,
                 'total_paid_amount' => $paymentSummary ? $paymentSummary->total_paid_amount : 0,
                 'total_unpaid_amount' => $paymentSummary ? $paymentSummary->total_unpaid_amount : 0,
-                'payment_completion_rate' => $paymentSummary && ($paymentSummary->paid_order + $paymentSummary->unpaid_order) > 0
-                    ? round(($paymentSummary->paid_order / ($paymentSummary->paid_order + $paymentSummary->unpaid_order)) * 100, 2)
+                'payment_completion_rate' => $paymentSummary && ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders) > 0
+                    ? round(($paymentSummary->paid_orders / ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders)) * 100, 2)
                     : 0,
-                'average_order_value' => $paymentSummary && ($paymentSummary->paid_order + $paymentSummary->unpaid_order) > 0
+                'average_order_value' => $paymentSummary && ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders) > 0
                     ? round(($paymentSummary->total_paid_amount + $paymentSummary->total_unpaid_amount) /
-                        ($paymentSummary->paid_order + $paymentSummary->unpaid_order), 2)
+                        ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders), 2)
                     : 0,
             ],
             'growth_metrics' => $growthMetrics,

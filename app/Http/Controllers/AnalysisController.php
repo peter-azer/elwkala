@@ -242,13 +242,13 @@ class AnalysisController extends Controller
     public function orderStatusAnalysis()
     {
         $statusDistribution = Order::select(
-            'handled as status',
+            'handed as status',
             DB::raw('COUNT(*) as count')
         )
-            ->groupBy('handled')
+            ->groupBy('handed')
             ->get()
             ->mapWithKeys(function ($item) {
-                $status = $item->status ? 'handled' : 'pending';
+                $status = $item->status ? 'handed' : 'pending';
                 return [$status => $item->count];
             });
 

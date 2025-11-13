@@ -140,74 +140,90 @@ class AnalysisController extends Controller
         $withSubcategories = $request->boolean('with_subcategories', false);
         $withBrands = $request->boolean('with_brands', false);
 
-        // First, get the base category query with counts
+        // Base query for categories with counts and sums
         $query = Category::query()
-            ->withCount('subCategory') // Count subcategories directly through the relationship
+            ->withCount('subCategory as subcategories_count')
+            ->withCount('brands as brands_count')
             ->leftJoin('sub_categories', 'categories.id', '=', 'sub_categories.category_id')
-            ->leftJoin('products', 'sub_categories.id', '=', 'products.sub_category_id')
+            ->leftJoin('products', function($join) {
+                $join->on('sub_categories.id', '=', 'products.sub_category_id')
+                    ->whereNull('products.deleted_at');
+            })
             ->leftJoin('orders', function($join) use ($startDate, $endDate) {
                 $join->on('products.id', '=', 'orders.product_id')
-                    ->whereBetween('orders.created_at', [$startDate, $endDate]);
+                    ->whereBetween('orders.created_at', [$startDate, $endDate])
+                    ->whereNull('orders.deleted_at');
             })
-            ->select(
+            ->select([
                 'categories.id',
                 'categories.category_name',
                 'categories.category_cover',
                 'categories.description',
                 'categories.hide',
-                // Count products through subcategories
+                // Calculate product count through subcategories
                 DB::raw('(SELECT COUNT(DISTINCT p.id) FROM products p 
-                          INNER JOIN sub_categories sc ON p.sub_category_id = sc.id 
-                          WHERE sc.category_id = categories.id) as products_count'),
-                // Count distinct subcategories
-                DB::raw('COUNT(DISTINCT sub_categories.id) as subcategories_count'),
-                // Calculate revenue and orders
+                         INNER JOIN sub_categories sc ON p.sub_category_id = sc.id 
+                         WHERE sc.category_id = categories.id AND p.deleted_at IS NULL) as products_count'),
+                // Calculate metrics for the date range
                 DB::raw('COALESCE(SUM(orders.total_order_price), 0) as total_revenue'),
                 DB::raw('COALESCE(SUM(orders.quantity), 0) as total_quantity_sold'),
                 DB::raw('COUNT(DISTINCT orders.id) as orders_count')
-            )
-            ->groupBy('categories.id', 'categories.category_name', 'categories.category_cover', 'categories.description', 'categories.hide')
+            ])
+            ->groupBy([
+                'categories.id',
+                'categories.category_name',
+                'categories.category_cover',
+                'categories.description',
+                'categories.hide'
+            ])
             ->orderBy('total_revenue', 'desc');
 
         // Add subcategory data if requested
         if ($withSubcategories) {
             $query->with(['subCategory' => function($query) use ($startDate, $endDate) {
-                $query->withCount('products')
-                    ->with(['products' => function($q) use ($startDate, $endDate) {
-                        $q->withCount(['orders as orders_count' => function($q) use ($startDate, $endDate) {
-                            $q->whereBetween('orders.created_at', [$startDate, $endDate]);
-                        }])
-                        ->withSum(['orders as total_revenue' => function($q) use ($startDate, $endDate) {
-                            $q->whereBetween('orders.created_at', [$startDate, $endDate])
-                                ->select(DB::raw('COALESCE(SUM(total_order_price), 0)'));
-                        }])
-                        ->withSum(['orders as total_quantity_sold' => function($q) use ($startDate, $endDate) {
-                            $q->whereBetween('orders.created_at', [$startDate, $endDate])
-                                ->select(DB::raw('COALESCE(SUM(quantity), 0)'));
-                        }]);
-                    }])
-                    ->withCount(['products.orders as orders_count' => function($q) use ($startDate, $endDate) {
-                        $q->whereBetween('orders.created_at', [$startDate, $endDate]);
-                    }])
-                    ->withSum(['products.orders as total_revenue' => function($q) use ($startDate, $endDate) {
-                        $q->whereBetween('orders.created_at', [$startDate, $endDate])
-                            ->select(DB::raw('COALESCE(SUM(orders.total_order_price), 0)'));
-                    }])
-                    ->withSum(['products.orders as total_quantity_sold' => function($q) use ($startDate, $endDate) {
-                        $q->whereBetween('orders.created_at', [$startDate, $endDate])
-                            ->select(DB::raw('COALESCE(SUM(orders.quantity), 0)'));
-                    }])
-                    ->orderBy('total_revenue', 'desc');
+                $query->withCount(['products' => function($q) {
+                    $q->whereNull('deleted_at');
+                }])
+                ->with(['products' => function($q) use ($startDate, $endDate) {
+                    $q->whereNull('deleted_at')
+                      ->withCount(['orders as orders_count' => function($q) use ($startDate, $endDate) {
+                          $q->whereBetween('created_at', [$startDate, $endDate])
+                            ->whereNull('deleted_at');
+                      }])
+                      ->withSum(['orders as total_revenue' => function($q) use ($startDate, $endDate) {
+                          $q->whereBetween('created_at', [$startDate, $endDate])
+                            ->whereNull('deleted_at')
+                            ->select(DB::raw('COALESCE(SUM(total_order_price), 0)'));
+                      }])
+                      ->withSum(['orders as total_quantity_sold' => function($q) use ($startDate, $endDate) {
+                          $q->whereBetween('created_at', [$startDate, $endDate])
+                            ->whereNull('deleted_at')
+                            ->select(DB::raw('COALESCE(SUM(quantity), 0)'));
+                      }]);
+                }])
+                ->withCount(['products.orders as orders_count' => function($q) use ($startDate, $endDate) {
+                    $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                      ->whereNull('orders.deleted_at');
+                }])
+                ->withSum(['products.orders as total_revenue' => function($q) use ($startDate, $endDate) {
+                    $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                      ->whereNull('orders.deleted_at')
+                      ->select(DB::raw('COALESCE(SUM(orders.total_order_price), 0)'));
+                }])
+                ->orderBy('total_revenue', 'desc');
             }]);
         }
 
         // Add brand data if requested
         if ($withBrands) {
             $query->with(['brands' => function($query) use ($startDate, $endDate) {
-                $query->withCount('products')
-                    ->withCount(['products.orders as orders_count' => function($q) use ($startDate, $endDate) {
-                        $q->whereBetween('orders.created_at', [$startDate, $endDate]);
-                    }])
+                $query->withCount(['products' => function($q) {
+                    $q->whereNull('deleted_at');
+                }])
+                ->withCount(['products.orders as orders_count' => function($q) use ($startDate, $endDate) {
+                    $q->whereBetween('orders.created_at', [$startDate, $endDate])
+                      ->whereNull('orders.deleted_at');
+                }])
                     ->withSum(['products.orders as total_revenue' => function($q) use ($startDate, $endDate) {
                         $q->whereBetween('orders.created_at', [$startDate, $endDate])
                             ->select(DB::raw('COALESCE(SUM(orders.total_order_price), 0)'));

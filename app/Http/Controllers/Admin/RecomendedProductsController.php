@@ -25,15 +25,34 @@ class RecomendedProductsController extends Controller
     public function store(StoreRecomendedProductsRequest $request)
     {
         try {
+            // Validate that product_ids is an array and all exist in products table
             $validatedData = $request->validate([
-                'product_id' => 'required|integer|exists:products,id',
+                'product_ids' => 'required|array',
+                'product_ids.*' => 'integer|exists:products,id',
             ]);
-            $recommended = RecomendedProducts::create($validatedData);
-            return response()->json($recommended, 201);
+
+            // Delete all previous recommended products
+            RecomendedProducts::truncate();
+
+            // Prepare data for bulk insert
+            $data = collect($validatedData['product_ids'])->map(function ($id) {
+                return ['product_id' => $id];
+            })->toArray();
+
+            // Insert all new recommended products
+            RecomendedProducts::insert($data);
+
+            return response()->json([
+                'message' => 'Recommended products updated successfully.',
+                'data' => $data,
+            ], 201);
         } catch (\Exception $error) {
-            return response()->json(['message' => $error->getMessage()], $error->getCode());
+            // Default to 500 if exception has no HTTP code
+            $code = $error->getCode() ?: 500;
+            return response()->json(['message' => $error->getMessage()], $code);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

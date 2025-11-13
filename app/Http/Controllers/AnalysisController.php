@@ -27,7 +27,7 @@ class AnalysisController extends Controller
         $salesData = Order::whereBetween('created_at', [$startDate, $endDate])
             ->select(
                 DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('COUNT(*) as total_order'),
                 DB::raw('SUM(total_amount) as total_sales'),
                 DB::raw('AVG(total_amount) as average_order_value')
             )
@@ -60,9 +60,9 @@ class AnalysisController extends Controller
         $query = Product::with(['category', 'brand', 'productsPacksSizes'])
             ->select(
                 'products.*',
-                DB::raw('COUNT(orders.id) AS times_ordered'),
-                DB::raw('COALESCE(SUM(orders.quantity), 0) AS total_quantity_sold'),
-                DB::raw('COALESCE(SUM(products.price * orders.quantity), 0) AS total_revenue')
+                DB::raw('COUNT(order.id) AS times_ordered'),
+                DB::raw('COALESCE(SUM(order.quantity), 0) AS total_quantity_sold'),
+                DB::raw('COALESCE(SUM(products.price * order.quantity), 0) AS total_revenue')
             )
             ->orderBy('times_ordered', 'desc');
 
@@ -101,10 +101,10 @@ class AnalysisController extends Controller
         $marketPerformance = Market::with(['area'])
             ->select(
                 'markets.*',
-                DB::raw('(SELECT COUNT(*) FROM orders WHERE orders.market_id = markets.id AND orders.created_at BETWEEN ? AND ?) as total_orders')
+                DB::raw('(SELECT COUNT(*) FROM order WHERE order.market_id = markets.id AND order.created_at BETWEEN ? AND ?) as total_order')
             )
             ->addBinding([$startDate, $endDate], 'select')
-            ->orderBy('total_orders', 'desc')
+            ->orderBy('total_order', 'desc')
             ->get();
 
         return response()->json([
@@ -142,7 +142,7 @@ class AnalysisController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function orderStatusAnalysis()
+    public function ordertatusAnalysis()
     {
         $statusDistribution = Order::select(
             'status',
@@ -174,7 +174,7 @@ class AnalysisController extends Controller
         $marketId = $request->input('market_id');
         $categoryId = $request->input('category_id');
 
-        // Base query for orders within date range
+        // Base query for order within date range
         $query = Order::whereBetween('created_at', [$startDate, $endDate]);
 
         // Apply market filter if provided
@@ -196,7 +196,7 @@ class AnalysisController extends Controller
         $salesData = (clone $query)
             ->select(
                 DB::raw("DATE_FORMAT(created_at, '{$dateFormat}') as period"),
-                DB::raw('COUNT(DISTINCT order_id) as total_orders'),
+                DB::raw('COUNT(DISTINCT order_id) as total_order'),
                 DB::raw('SUM(total_order_price) as total_revenue'),
                 DB::raw('SUM(CASE WHEN paid = 1 THEN total_order_price ELSE 0 END) as paid_amount'),
                 DB::raw('SUM(CASE WHEN paid = 0 THEN total_order_price ELSE 0 END) as pending_payment'),
@@ -208,15 +208,15 @@ class AnalysisController extends Controller
 
         // Get product performance data
         $productPerformance = (clone $query)
-            ->join('products', 'orders.product_id', '=', 'products.id')
-            ->join('products_packs_sizes', 'orders.products_packs_sizes_id', '=', 'products_packs_sizes.id')
+            ->join('products', 'order.product_id', '=', 'products.id')
+            ->join('products_packs_sizes', 'order.products_packs_sizes_id', '=', 'products_packs_sizes.id')
             ->select(
                 'products.id as product_id',
                 'products.name as product_name',
-                DB::raw('SUM(orders.quantity) as total_quantity_sold'),
-                DB::raw('SUM(orders.total_order_price) as total_revenue'),
-                DB::raw('SUM(products_packs_sizes.pack_price * orders.quantity) as total_retail_value'),
-                DB::raw('SUM(orders.total_order_price - (products_packs_sizes.pack_price * orders.quantity)) as total_profit')
+                DB::raw('SUM(order.quantity) as total_quantity_sold'),
+                DB::raw('SUM(order.total_order_price) as total_revenue'),
+                DB::raw('SUM(products_packs_sizes.pack_price * order.quantity) as total_retail_value'),
+                DB::raw('SUM(order.total_order_price - (products_packs_sizes.pack_price * order.quantity)) as total_profit')
             )
             ->groupBy('products.id', 'products.name')
             ->orderBy('total_revenue', 'desc')
@@ -225,14 +225,14 @@ class AnalysisController extends Controller
 
         // Get category performance
         $categoryPerformance = (clone $query)
-            ->join('products', 'orders.product_id', '=', 'products.id')
+            ->join('products', 'order.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->select(
                 'categories.id as category_id',
                 'categories.name as category_name',
-                DB::raw('COUNT(DISTINCT orders.order_id) as order_count'),
-                DB::raw('SUM(orders.total_order_price) as total_revenue'),
-                DB::raw('SUM(orders.quantity) as total_quantity_sold')
+                DB::raw('COUNT(DISTINCT order.order_id) as order_count'),
+                DB::raw('SUM(order.total_order_price) as total_revenue'),
+                DB::raw('SUM(order.quantity) as total_quantity_sold')
             )
             ->groupBy('categories.id', 'categories.name')
             ->orderBy('total_revenue', 'desc')
@@ -241,8 +241,8 @@ class AnalysisController extends Controller
         // Get payment status summary
         $paymentSummary = (clone $query)
             ->select(
-                DB::raw('COUNT(DISTINCT CASE WHEN paid = 1 THEN order_id END) as paid_orders'),
-                DB::raw('COUNT(DISTINCT CASE WHEN paid = 0 THEN order_id END) as unpaid_orders'),
+                DB::raw('COUNT(DISTINCT CASE WHEN paid = 1 THEN order_id END) as paid_order'),
+                DB::raw('COUNT(DISTINCT CASE WHEN paid = 0 THEN order_id END) as unpaid_order'),
                 DB::raw('SUM(CASE WHEN paid = 1 THEN total_order_price ELSE 0 END) as total_paid_amount'),
                 DB::raw('SUM(CASE WHEN paid = 0 THEN total_order_price ELSE 0 END) as total_unpaid_amount')
             )
@@ -257,7 +257,7 @@ class AnalysisController extends Controller
             $previousPeriodData = (clone $query)
                 ->whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])
                 ->select(
-                    DB::raw('COUNT(DISTINCT order_id) as total_orders'),
+                    DB::raw('COUNT(DISTINCT order_id) as total_order'),
                     DB::raw('SUM(total_order_price) as total_revenue')
                 )
                 ->first();
@@ -267,14 +267,14 @@ class AnalysisController extends Controller
         $growthMetrics = [];
         if ($previousPeriodData) {
             $currentPeriodData = $query->select(
-                DB::raw('COUNT(DISTINCT order_id) as total_orders'),
+                DB::raw('COUNT(DISTINCT order_id) as total_order'),
                 DB::raw('SUM(total_order_price) as total_revenue')
             )->first();
 
             $growthMetrics = [
                 'order_growth_percentage' => $this->calculateGrowth(
-                    $previousPeriodData->total_orders,
-                    $currentPeriodData->total_orders
+                    $previousPeriodData->total_order,
+                    $currentPeriodData->total_order
                 ),
                 'revenue_growth_percentage' => $this->calculateGrowth(
                     $previousPeriodData->total_revenue,
@@ -283,7 +283,7 @@ class AnalysisController extends Controller
                 'previous_period' => [
                     'start_date' => $previousPeriodStart->format('Y-m-d'),
                     'end_date' => $previousPeriodEnd->format('Y-m-d'),
-                    'total_orders' => $previousPeriodData->total_orders,
+                    'total_order' => $previousPeriodData->total_order,
                     'total_revenue' => $previousPeriodData->total_revenue
                 ]
             ];
@@ -297,16 +297,16 @@ class AnalysisController extends Controller
                 'group_by' => $groupBy
             ],
             'summary' => [
-                'total_orders' => $paymentSummary ? $paymentSummary->paid_orders + $paymentSummary->unpaid_orders : 0,
+                'total_order' => $paymentSummary ? $paymentSummary->paid_order + $paymentSummary->unpaid_order : 0,
                 'total_revenue' => $paymentSummary ? $paymentSummary->total_paid_amount + $paymentSummary->total_unpaid_amount : 0,
                 'total_paid_amount' => $paymentSummary ? $paymentSummary->total_paid_amount : 0,
                 'total_unpaid_amount' => $paymentSummary ? $paymentSummary->total_unpaid_amount : 0,
-                'payment_completion_rate' => $paymentSummary && ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders) > 0
-                    ? round(($paymentSummary->paid_orders / ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders)) * 100, 2)
+                'payment_completion_rate' => $paymentSummary && ($paymentSummary->paid_order + $paymentSummary->unpaid_order) > 0
+                    ? round(($paymentSummary->paid_order / ($paymentSummary->paid_order + $paymentSummary->unpaid_order)) * 100, 2)
                     : 0,
-                'average_order_value' => $paymentSummary && ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders) > 0
+                'average_order_value' => $paymentSummary && ($paymentSummary->paid_order + $paymentSummary->unpaid_order) > 0
                     ? round(($paymentSummary->total_paid_amount + $paymentSummary->total_unpaid_amount) /
-                        ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders), 2)
+                        ($paymentSummary->paid_order + $paymentSummary->unpaid_order), 2)
                     : 0,
             ],
             'growth_metrics' => $growthMetrics,

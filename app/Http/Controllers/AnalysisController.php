@@ -57,12 +57,12 @@ class AnalysisController extends Controller
         $categoryId = $request->input('category_id');
         $brandId = $request->input('brand_id');
 
-        $query = Product::with(['category', 'brand'])
+        $query = Product::with(['category', 'brand', 'productsPacksSizes'])
             ->select(
                 'products.*',
-                DB::raw('(SELECT COUNT(*) FROM order WHERE order.product_id = products.id) as times_ordered'),
-                DB::raw('(SELECT SUM(quantity) FROM order WHERE order.product_id = products.id) as total_quantity_sold'),
-                DB::raw('(SELECT SUM(price * quantity) FROM order WHERE order.product_id = products.id) as total_revenue')
+                DB::raw('COUNT(orders.id) AS times_ordered'),
+                DB::raw('COALESCE(SUM(orders.quantity), 0) AS total_quantity_sold'),
+                DB::raw('COALESCE(SUM(products.price * orders.quantity), 0) AS total_revenue')
             )
             ->orderBy('times_ordered', 'desc');
 
@@ -125,7 +125,7 @@ class AnalysisController extends Controller
     public function categoryAnalysis()
     {
         $categories = Category::withCount('products')
-            ->withSum(['products' => function($query) {
+            ->withSum(['products' => function ($query) {
                 $query->select(DB::raw('COALESCE(SUM(price * (SELECT SUM(quantity) FROM order WHERE order.product_id = products.id)), 0)'));
             }], 'price')
             ->orderBy('products_sum_price', 'desc')
@@ -145,12 +145,12 @@ class AnalysisController extends Controller
     public function orderStatusAnalysis()
     {
         $statusDistribution = Order::select(
-                'status',
-                DB::raw('COUNT(*) as count')
-            )
+            'status',
+            DB::raw('COUNT(*) as count')
+        )
             ->groupBy('status')
             ->get()
-            ->mapWithKeys(function($item) {
+            ->mapWithKeys(function ($item) {
                 return [$item->status => $item->count];
             });
 
@@ -184,14 +184,14 @@ class AnalysisController extends Controller
 
         // Apply category filter if provided
         if ($categoryId) {
-            $query->whereHas('product', function($q) use ($categoryId) {
+            $query->whereHas('product', function ($q) use ($categoryId) {
                 $q->where('category_id', $categoryId);
             });
         }
 
         // Group by time period
         $dateFormat = $this->getDateFormatForGroupBy($groupBy);
-        
+
         // Get sales data grouped by time period
         $salesData = (clone $query)
             ->select(
@@ -251,7 +251,7 @@ class AnalysisController extends Controller
         // Calculate growth metrics if we have previous period data
         $previousPeriodEnd = Carbon::parse($startDate)->subDay();
         $previousPeriodStart = $this->getPreviousPeriodStart($startDate, $groupBy);
-        
+
         $previousPeriodData = null;
         if ($previousPeriodStart) {
             $previousPeriodData = (clone $query)
@@ -301,12 +301,12 @@ class AnalysisController extends Controller
                 'total_revenue' => $paymentSummary ? $paymentSummary->total_paid_amount + $paymentSummary->total_unpaid_amount : 0,
                 'total_paid_amount' => $paymentSummary ? $paymentSummary->total_paid_amount : 0,
                 'total_unpaid_amount' => $paymentSummary ? $paymentSummary->total_unpaid_amount : 0,
-                'payment_completion_rate' => $paymentSummary && ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders) > 0 
+                'payment_completion_rate' => $paymentSummary && ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders) > 0
                     ? round(($paymentSummary->paid_orders / ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders)) * 100, 2)
                     : 0,
                 'average_order_value' => $paymentSummary && ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders) > 0
-                    ? round(($paymentSummary->total_paid_amount + $paymentSummary->total_unpaid_amount) / 
-                           ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders), 2)
+                    ? round(($paymentSummary->total_paid_amount + $paymentSummary->total_unpaid_amount) /
+                        ($paymentSummary->paid_orders + $paymentSummary->unpaid_orders), 2)
                     : 0,
             ],
             'growth_metrics' => $growthMetrics,
@@ -325,7 +325,7 @@ class AnalysisController extends Controller
      */
     private function getDateFormatForGroupBy($groupBy)
     {
-        return match($groupBy) {
+        return match ($groupBy) {
             'day' => '%Y-%m-%d',
             'week' => '%x-W%v', // ISO week
             'month' => '%Y-%m',
@@ -340,8 +340,8 @@ class AnalysisController extends Controller
     private function getPreviousPeriodStart($currentStart, $groupBy)
     {
         $start = Carbon::parse($currentStart);
-        
-        return match($groupBy) {
+
+        return match ($groupBy) {
             'day' => $start->copy()->subDay(),
             'week' => $start->copy()->subWeek(),
             'month' => $start->copy()->subMonth(),

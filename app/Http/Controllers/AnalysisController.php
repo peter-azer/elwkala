@@ -342,10 +342,7 @@ class AnalysisController extends Controller
                 DB::raw('SUM(orders.total_order_price) as total_revenue'),
                 DB::raw('SUM(orders.quantity) as total_quantity_sold')
             )
-            ->whereBetween('orders.created_at', [$startDate, $endDate])
-            ->whereNull('products.deleted_at')
-            ->whereNull('sub_categories.deleted_at')
-            ->whereNull('categories.deleted_at');
+            ->whereBetween('orders.created_at', [$startDate, $endDate]);
 
         if ($marketId) {
             $categoryPerformance->where('orders.market_id', $marketId);

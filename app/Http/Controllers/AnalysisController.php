@@ -60,9 +60,9 @@ class AnalysisController extends Controller
         $query = Product::with(['category', 'brand'])
             ->select(
                 'products.*',
-                DB::raw('(SELECT COUNT(*) FROM order_items WHERE order_items.product_id = products.id) as times_ordered'),
-                DB::raw('(SELECT SUM(quantity) FROM order_items WHERE order_items.product_id = products.id) as total_quantity_sold'),
-                DB::raw('(SELECT SUM(price * quantity) FROM order_items WHERE order_items.product_id = products.id) as total_revenue')
+                DB::raw('(SELECT COUNT(*) FROM order WHERE order.product_id = products.id) as times_ordered'),
+                DB::raw('(SELECT SUM(quantity) FROM order WHERE order.product_id = products.id) as total_quantity_sold'),
+                DB::raw('(SELECT SUM(price * quantity) FROM order WHERE order.product_id = products.id) as total_revenue')
             )
             ->orderBy('times_ordered', 'desc');
 
@@ -126,7 +126,7 @@ class AnalysisController extends Controller
     {
         $categories = Category::withCount('products')
             ->withSum(['products' => function($query) {
-                $query->select(DB::raw('COALESCE(SUM(price * (SELECT SUM(quantity) FROM order_items WHERE order_items.product_id = products.id)), 0)'));
+                $query->select(DB::raw('COALESCE(SUM(price * (SELECT SUM(quantity) FROM order WHERE order.product_id = products.id)), 0)'));
             }], 'price')
             ->orderBy('products_sum_price', 'desc')
             ->get();

@@ -273,7 +273,7 @@ class AnalysisController extends Controller
         $categoryId = $request->input('category_id');
 
         // Base query for order within date range
-        $query = Order::whereBetween('created_at', [$startDate, $endDate]);
+        $query = Order::query()->whereBetween('orders.created_at', [$startDate, $endDate]);
 
         // Apply market filter if provided
         if ($marketId) {
@@ -287,13 +287,65 @@ class AnalysisController extends Controller
             });
         }
 
+        // Get product performance
+        $productPerformance = DB::table('orders')
+            ->join('products', 'orders.product_id', '=', 'products.id')
+            ->leftJoin('products_packs_sizes', 'orders.products_packs_sizes_id', '=', 'products_packs_sizes.id')
+            ->select(
+                'products.id as product_id',
+                'products.product_name',
+                DB::raw('SUM(orders.quantity) as total_quantity_sold'),
+                DB::raw('SUM(orders.total_order_price) as total_revenue'),
+                DB::raw('COALESCE(SUM(products_packs_sizes.pack_price * orders.quantity), 0) as total_retail_value'),
+                DB::raw('SUM(orders.total_order_price - COALESCE(products_packs_sizes.pack_price * orders.quantity, 0)) as total_profit')
+            )
+            ->whereBetween('orders.created_at', [$startDate, $endDate]);
+
+        if ($marketId) {
+            $productPerformance->where('orders.market_id', $marketId);
+        }
+        if ($categoryId) {
+            $productPerformance->where('products.category_id', $categoryId);
+        }
+
+        $productPerformance = $productPerformance
+            ->groupBy('products.id', 'products.product_name')
+            ->orderBy('total_revenue', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Get category performance
+        $categoryPerformance = DB::table('orders')
+            ->join('products', 'orders.product_id', '=', 'products.id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->select(
+                'categories.id as category_id',
+                'categories.category_name',
+                DB::raw('COUNT(DISTINCT orders.order_id) as order_count'),
+                DB::raw('SUM(orders.total_order_price) as total_revenue'),
+                DB::raw('SUM(orders.quantity) as total_quantity_sold')
+            )
+            ->whereBetween('orders.created_at', [$startDate, $endDate]);
+
+        if ($marketId) {
+            $categoryPerformance->where('orders.market_id', $marketId);
+        }
+        if ($categoryId) {
+            $categoryPerformance->where('products.category_id', $categoryId);
+        }
+
+        $categoryPerformance = $categoryPerformance
+            ->groupBy('categories.id', 'categories.category_name')
+            ->orderBy('total_revenue', 'desc')
+            ->get();
+
         // Group by time period
         $dateFormat = $this->getDateFormatForGroupBy($groupBy);
 
         // Get sales data grouped by time period
         $salesData = (clone $query)
             ->select(
-                DB::raw("DATE_FORMAT(created_at, '{$dateFormat}') as period"),
+                DB::raw("DATE_FORMAT(orders.created_at, '{$dateFormat}') as period"),
                 DB::raw('COUNT(DISTINCT order_id) as total_order'),
                 DB::raw('SUM(total_order_price) as total_revenue'),
                 DB::raw('SUM(CASE WHEN paid = 1 THEN total_order_price ELSE 0 END) as paid_amount'),
@@ -304,37 +356,30 @@ class AnalysisController extends Controller
             ->orderBy('period')
             ->get();
 
-        // Get product performance data
-        $productPerformance = (clone $query)
-            ->join('products', 'orders.product_id', '=', 'products.id')
-            ->leftJoin('products_packs_sizes', 'orders.products_packs_sizes_id', '=', 'products_packs_sizes.id')
+        // Get payment status summary
+        $paymentSummary = (clone $query)
             ->select(
-                'products.id as product_id',
-                'products.name as product_name',
-                DB::raw('SUM(orders.quantity) as total_quantity_sold'),
-                DB::raw('SUM(orders.total_order_price) as total_revenue'),
-                DB::raw('COALESCE(SUM(products_packs_sizes.pack_price * orders.quantity), 0) as total_retail_value'),
-                DB::raw('SUM(orders.total_order_price - COALESCE(products_packs_sizes.pack_price * orders.quantity, 0)) as total_profit')
+                DB::raw('COUNT(DISTINCT CASE WHEN paid = 1 THEN order_id END) as paid_order'),
+                DB::raw('COUNT(DISTINCT CASE WHEN paid = 0 THEN order_id END) as unpaid_order'),
+                DB::raw('SUM(CASE WHEN paid = 1 THEN total_order_price ELSE 0 END) as total_paid_amount'),
+                DB::raw('SUM(CASE WHEN paid = 0 THEN total_order_price ELSE 0 END) as total_unpaid_amount')
             )
-            ->groupBy('products.id', 'products.name')
-            ->orderBy('total_revenue', 'desc')
-            ->limit(10)
-            ->get();
+            ->first();
 
-        // Get category performance
-        $categoryPerformance = (clone $query)
-            ->join('products', 'orders.product_id', '=', 'products.id')
-            ->join('categories', 'products.category_id', '=', 'categories.id')
-            ->select(
-                'categories.id as category_id',
-                'categories.name as category_name',
-                DB::raw('COUNT(DISTINCT orders.order_id) as order_count'),
-                DB::raw('SUM(orders.total_order_price) as total_revenue'),
-                DB::raw('SUM(orders.quantity) as total_quantity_sold')
-            )
-            ->groupBy('categories.id', 'categories.name')
-            ->orderBy('total_revenue', 'desc')
-            ->get();
+        // Calculate growth metrics
+        $previousPeriodEnd = Carbon::parse($startDate)->subDay();
+        $previousPeriodStart = $this->getPreviousPeriodStart($startDate, $groupBy);
+
+        $previousPeriodData = null;
+        if ($previousPeriodStart) {
+            $previousPeriodData = (clone $query)
+                ->whereBetween('orders.created_at', [$previousPeriodStart, $previousPeriodEnd])
+                ->select(
+                    DB::raw('COUNT(DISTINCT order_id) as total_order'),
+                    DB::raw('SUM(total_order_price) as total_revenue')
+                )
+                ->first();
+        }
 
         // Get payment status summary
         $paymentSummary = (clone $query)

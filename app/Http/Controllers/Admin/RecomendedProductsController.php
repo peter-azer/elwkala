@@ -52,6 +52,16 @@ class RecomendedProductsController extends Controller
     }
 
 
+    public function getRecommendations()
+    {
+        try {
+            $recommendedProducts = RecomendedProducts::with('product')->get();
+            return response()->json($recommendedProducts, 200);
+        } catch (\Exception $error) {
+            return response()->json(['message' => $error->getMessage()], 500);
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      */

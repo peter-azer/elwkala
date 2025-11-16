@@ -116,6 +116,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
 
 });
 
+Route::get('/recommendations', [RecomendedProductsController::class, 'getRecommendations']);
 // Handel offers and sales #Done
 
 Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('application')->group(function () {

@@ -49,7 +49,7 @@ class RecomendedProductsController extends Controller
         } catch (\Exception $error) {
             // Default to 500 if exception has no HTTP code
             $code = $error->getCode() ?: 500;
-            return response()->json(['message' => $error->getMessage()], $code);
+            return response()->json(['message' => $error->getMessage()], 500);
         }
     }
 

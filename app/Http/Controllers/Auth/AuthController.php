@@ -83,7 +83,7 @@ class AuthController extends Controller
                 'max_order_quantity' => $request->max_order_quantity,
                 'address' => $request->address
             ]);
-            // $market->assignRole($request->role);
+            return response()->json(['message' => 'Market registered successfully'], 201);
         } catch (\Exception $error) {
             return response()->json(["message" => $error], 500);
         }

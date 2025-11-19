@@ -89,11 +89,12 @@ class UserController extends Controller
         }
     }
 
-    public function getAssignedOrders(Request $request, $id)
+    public function getAssignedOrders()
     {
         try {
+            $user = auth()->user();
             $assignedOrders = AssignedOrders::query()
-                ->where('user_id', $id)
+                ->where('user_id', $user->id)
                 ->with('order')
                 ->get();
             return response()->json($assignedOrders);

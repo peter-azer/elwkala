@@ -34,7 +34,7 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware(['auth:sanctum', 'role:super admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function () {
     Route::post('/register-user', [AuthController::class, 'registerUser']); #Done
     Route::post('/register-market', [AuthController::class, 'registerMarket']); #Done
 });
@@ -118,6 +118,13 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
 
 Route::get('/recommendations', [RecomendedProductsController::class, 'getRecommendations']);
 // Handel offers and sales #Done
+
+Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function () {
+    Route::get('/assign/representative', [AdminUserController::class, 'assign']); #Done
+    Route::get('/unassign/representative', [AdminUserController::class, 'unassign']); #Done
+    Route::get('/representative/orders', [AdminUserController::class, 'getAssignedOrders']); #Done
+});
+
 
 Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('application')->group(function () {
     // categories routes

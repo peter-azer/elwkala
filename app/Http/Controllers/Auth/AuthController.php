@@ -78,8 +78,8 @@ class AuthController extends Controller
                 'owner_name' => $request->owner_name,
                 'manager_name' => $request->manager_name,
                 'market_name' => $request->market_name,
-                'phone2' => $request->phone2,
-                'phone3' => $request->phone3,
+                'phone2' => $request->phone2 ?? null,
+                'phone3' => $request->phone3 ?? null,
                 'max_order_quantity' => $request->max_order_quantity,
                 'address' => $request->address
             ]);

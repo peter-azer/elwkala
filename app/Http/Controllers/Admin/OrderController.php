@@ -18,7 +18,7 @@ class OrderController extends Controller
     {
         try {
             $orders = Order::query()
-                ->with('market', 'assignedOrders.name', 'product', 'product.productsPacksSizes')
+                ->with('market', 'assignedOrders.user[name]', 'product', 'product.productsPacksSizes')
                 ->get();
             return response()->json($orders);
         } catch (\Exception $error) {

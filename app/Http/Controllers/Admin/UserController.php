@@ -74,7 +74,7 @@ class UserController extends Controller
             $assign = AssignedOrders::create($validatedData);
             return response()->json(["message" => "update successfully"], 200);
         } catch (\Exception $error) {
-            return response()->json(['message', $error->getMessage()], $error->getCode());
+            return response()->json(['message', $error->getMessage()], 500);
         }
     }
 
@@ -85,7 +85,7 @@ class UserController extends Controller
             $assign->delete();
             return response()->json(["message" => "delete successfully"], 200);
         } catch (\Exception $error) {
-            return response()->json(['message', $error->getMessage()], $error->getCode());
+            return response()->json(['message', $error->getMessage()], 500);
         }
     }
 
@@ -117,7 +117,7 @@ class UserController extends Controller
             $user->delete();
             return response()->json(["message" => "delete successfully"], 200);
         } catch (\Exception $error) {
-            return response()->json(['message', $error->getMessage()], $error->getCode());
+            return response()->json(['message', $error->getMessage()], 500);
         }
     }
 }

@@ -14,12 +14,12 @@ class AssignedOrders extends Model
     ];
 
     public function users(){
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'user_id');
     }
     public function markets(){
-        return $this->hasMany(Market::class);
+        return $this->hasMany(Market::class, 'market_id');
     }
     public function order(){
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'order_id');
     }
 }

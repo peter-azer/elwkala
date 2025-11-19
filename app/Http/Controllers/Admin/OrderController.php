@@ -20,18 +20,11 @@ class OrderController extends Controller
             $orders = Order::with([
                 'market',
                 'product',
-                'product.productsPacksSizes',
-                'assignedOrders.users' => function ($query) {
-                    $query->select('id', 'name');
+                'productsPacksSizes',
+                'assignedUser.users' => function ($query) {
+                    $query->select('id', 'name'); // only return name
                 }
-            ])
-                ->get()
-                ->map(function ($order) {
-                    // Convert assignedOrders.users collection into a single user
-                    $order->assigned_user = optional($order->assignedOrders->first()?->users->first()->all());
-                    unset($order->assignedOrders); // Remove the full records from API response
-                    return $order;
-                });
+            ])->get();
 
             return response()->json($orders);
         } catch (\Exception $error) {

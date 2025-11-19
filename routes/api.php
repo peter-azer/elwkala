@@ -120,8 +120,8 @@ Route::get('/recommendations', [RecomendedProductsController::class, 'getRecomme
 // Handel offers and sales #Done
 
 Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function () {
-    Route::get('/assign/representative', [AdminUserController::class, 'assign']); #Done
-    Route::get('/unassign/representative', [AdminUserController::class, 'unassign']); #Done
+    Route::post('/assign/representative', [AdminUserController::class, 'assign']); #Done
+    Route::delete('/unassign/representative/{id}', [AdminUserController::class, 'unassign']); #Done
     Route::get('/representative/orders', [AdminUserController::class, 'getAssignedOrders']); #Done
 });
 

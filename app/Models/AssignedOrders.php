@@ -19,4 +19,7 @@ class AssignedOrders extends Model
     public function markets(){
         return $this->hasMany(Market::class);
     }
+    public function order(){
+        return $this->hasMany(Order::class);
+    }
 }

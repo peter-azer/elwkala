@@ -33,5 +33,8 @@ class Order extends Model
     {
         return $this->belongsTo(ProductsPacksSizes::class, 'products_packs_sizes_id');
     }
+    public function assignedOrders(){
+        return $this->hasMany(AssignedOrders::class);
+    }
 
 }

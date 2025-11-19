@@ -92,7 +92,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::delete('/order/delete/{id}', [AdminOrderController::class, 'destroy']); #Done
     Route::post('/order/assign', [AdminUserController::class, 'assign']); # assign orders to representative
     Route::delete('/order/unassign/{id}', [AdminUserController::class, 'unassign']); # unassign orders from representative
-    Route::post('/order/assigned', [AdminUserController::class, 'getAssignedOrders']); # show each representative orders
+    Route::post('/order/assigned', [AdminUserController::class, 'getAllOrdersAssignments']); # show each representative orders
     // handle packs and sizes
     Route::get('/packs', [AdminProductsPacksController::class, 'index']); #Done
     Route::post('/pack/create', [AdminProductsPacksController::class, 'store']); #Done
@@ -120,8 +120,6 @@ Route::get('/recommendations', [RecomendedProductsController::class, 'getRecomme
 // Handel offers and sales #Done
 
 Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function () {
-    Route::post('/assign/representative', [AdminUserController::class, 'assign']); #Done
-    Route::delete('/unassign/representative/{id}', [AdminUserController::class, 'unassign']); #Done
     Route::get('/representative/orders', [AdminUserController::class, 'getAssignedOrders']); #Done
 });
 

@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('markets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('phone2');
-            $table->string('phone3');
+            $table->string('phone2')->nullable();
+            $table->string('phone3')->nullable();
             $table->string('owner_name');
             $table->string('manager_name')->nullable();
             $table->string('market_name');

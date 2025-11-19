@@ -89,6 +89,10 @@ class UserController extends Controller
         }
     }
 
+    public function getAllOrdersAssignments(){
+        $assignedOrders = AssignedOrders::with('markets', 'order')->get();
+        return response()->json($assignedOrders);
+    }
     public function getAssignedOrders()
     {
         try {

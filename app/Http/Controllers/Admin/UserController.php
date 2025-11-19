@@ -68,7 +68,7 @@ class UserController extends Controller
             $validatedData = $request->validate([
                 'user_id' => 'required|exists:users,id',
                 'market_id' => 'required|exists:markets,id',
-                'order_id' => 'required|string'
+                'order_id' => 'required|exists:orders,id'
             ]);
 
             $assign = AssignedOrders::create($validatedData);

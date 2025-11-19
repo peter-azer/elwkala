@@ -28,7 +28,7 @@ class OrderController extends Controller
                 ->get()
                 ->map(function ($order) {
                     // Convert assignedOrders.users collection into a single user
-                    $order->assigned_user = optional($order->assignedOrders->first()?->users->first())->only('id', 'name');
+                    $order->assigned_user = optional($order->assignedOrders->first()?->users->first());
                     unset($order->assignedOrders); // Remove the full records from API response
                     return $order;
                 });

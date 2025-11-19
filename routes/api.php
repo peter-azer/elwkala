@@ -37,7 +37,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function () {
     Route::post('/register-user', [AuthController::class, 'registerUser']); #Done
     Route::post('/register-market', [AuthController::class, 'registerMarket']); #Done
-    Route::get('/users', [AdminUserController::class, 'getUsers']); #Done
+    Route::get('/dashboard/users', [AdminUserController::class, 'getUsers']); #Done
+    Route::get('/dashboard/areas', [AreaController::class, 'index']);
+    Route::get('/representative/orders', [AdminUserController::class, 'getAssignedOrders']); #Done
 });
 
 
@@ -47,8 +49,7 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::put('/user/edit/{id}', [AdminUserController::class, 'update']); #Done
     Route::delete('/user/delete/{id}', [AdminUserController::class, 'destroy']); #Done
     Route::get('/user/markets/{id}', [AdminUserController::class, 'getUserMarkets']); #Done
-    //areas routes
-    Route::get('/areas', [AreaController::class, 'index']);
+
     // market routes
     Route::get('/markets', [AdminMarketController::class, 'getAllMarkets']); #Done
     Route::get('/market/{id}', [AdminMarketController::class, 'getMarket']); #Done
@@ -118,11 +119,6 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
 
 Route::get('/recommendations', [RecomendedProductsController::class, 'getRecommendations']);
 // Handel offers and sales #Done
-
-Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function () {
-    Route::get('/representative/orders', [AdminUserController::class, 'getAssignedOrders']); #Done
-});
-
 
 Route::middleware(['auth:sanctum', 'role:user|super admin'])->prefix('application')->group(function () {
     // categories routes

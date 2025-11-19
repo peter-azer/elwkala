@@ -37,13 +37,13 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function () {
     Route::post('/register-user', [AuthController::class, 'registerUser']); #Done
     Route::post('/register-market', [AuthController::class, 'registerMarket']); #Done
+    Route::get('/users', [AdminUserController::class, 'getUsers']); #Done
 });
 
 
 Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->group(function () {
     // users routes
     Route::get('/Admins', [AdminUserController::class, 'index']); #Done
-    Route::get('/users', [AdminUserController::class, 'getUsers']); #Done
     Route::put('/user/edit/{id}', [AdminUserController::class, 'update']); #Done
     Route::delete('/user/delete/{id}', [AdminUserController::class, 'destroy']); #Done
     Route::get('/user/markets/{id}', [AdminUserController::class, 'getUserMarkets']); #Done

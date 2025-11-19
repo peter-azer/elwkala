@@ -67,8 +67,8 @@ class AuthController extends Controller
                 'owner_name' => 'required|string|max:255',
                 'manager_name' => 'required|string|max:255',
                 'market_name' => 'required|string|max:255',
-                'phone2' => 'sometimes|string',
-                'phone3' => 'sometimes|string',
+                'phone2' => 'nullable|string',
+                'phone3' => 'nullable|string',
                 'address' => 'required|string',
                 'max_order_quantity' => 'required|integer'
             ]);

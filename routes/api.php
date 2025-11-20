@@ -40,7 +40,7 @@ Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function ()
     Route::get('/dashboard/users', [AdminUserController::class, 'getUsers']); #Done
     Route::get('/dashboard/areas', [AreaController::class, 'index']);
     Route::get('/representative/orders', [AdminUserController::class, 'getAssignedOrders']); #Done
-    Route::get('/order/{id}', [AdminOrderController::class, 'show']); #Done
+    Route::get('/dashboard/order/{id}', [AdminOrderController::class, 'show']); #Done
 
 });
 

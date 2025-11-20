@@ -40,6 +40,8 @@ Route::middleware(['auth:sanctum', 'role:admin|super admin'])->group(function ()
     Route::get('/dashboard/users', [AdminUserController::class, 'getUsers']); #Done
     Route::get('/dashboard/areas', [AreaController::class, 'index']);
     Route::get('/representative/orders', [AdminUserController::class, 'getAssignedOrders']); #Done
+    Route::get('/order/{id}', [AdminOrderController::class, 'show']); #Done
+
 });
 
 
@@ -85,7 +87,6 @@ Route::middleware(['auth:sanctum', 'role:super admin'])->prefix('dashboard')->gr
     Route::delete('/brand/delete/{brand}', [BrandController::class, 'destroy']);
     // orders routes
     Route::get('/orders', [AdminOrderController::class, 'index']); #Done
-    Route::get('/order/{id}', [AdminOrderController::class, 'show']); #Done
     Route::get('/order/handed/{id}', [AdminOrderController::class, 'handedToggler']); #Done
     Route::get('/order/paid/{id}', [AdminOrderController::class, 'paidToggler']); #Done
     Route::post('/order/create', [AdminOrderController::class, 'store']); #Done

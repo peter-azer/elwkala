@@ -99,7 +99,11 @@ class UserController extends Controller
             $user = auth()->user();
             $assignedOrders = AssignedOrders::query()
                 ->where('user_id', $user->id)
-                ->with('order')
+                ->with(
+                'order',
+                'order.market',
+                'order.product',
+                'order.productsPacksSizes')
                 ->get();
             return response()->json($assignedOrders);
         } catch (\Exception $error) {
